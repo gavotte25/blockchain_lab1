@@ -17,21 +17,16 @@ type Block struct {
 	Hash          []byte
 }
 
-func (b *Block) SetHash() {
-	timeBytes := utils.ConvertTimestampToByte(b.Timestamp)
-	hashInput := append(b.HashTransactions(), timeBytes...)
+func (block *Block) SetHash() {
+	timeBytes := utils.ConvertTimestampToByte(block.Timestamp)
+	hashInput := append(block.PrevBlockHash, block.HashTransactions()...)
+	hashInput = append(hashInput, timeBytes...)
 	hashOutput := sha256.Sum256(hashInput)
-	b.Hash = hashOutput[:]
+	block.Hash = hashOutput[:]
 }
 
-func (b *Block) HashTransactions() []byte {
-	var hashInput []byte
-	for _, tx := range b.Transactions {
-		hashTx := sha256.Sum256(tx.Data)
-		hashInput = append(hashInput, hashTx[:]...)
-	}
-	hashOutput := sha256.Sum256(hashInput)
-	return hashOutput[:]
+func (block *Block) HashTransactions() []byte {
+	return CreateMerkleTree(block.Transactions).Root.Hash
 }
 
 func NewBlock(TransactionData string, prevBlockHash []byte) *Block {
@@ -83,4 +78,9 @@ func (block *Block) PrintTransaction() {
 		fmt.Printf("-- Created timestamp (UTC+0): %s\n", utils.GetTimestampFormat(transaction.Timestamp))
 		fmt.Printf("-- Data: %x\n", transaction.Data)
 	}
+}
+
+func (block *Block) VerifyTransaction(tx *Transaction) bool {
+	// TODO (Phuc) using merkle tree, this method is used by light node (server)
+	return true
 }
