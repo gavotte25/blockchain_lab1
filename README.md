@@ -15,3 +15,7 @@ https://bitcoin.stackexchange.com/questions/88763/finding-a-transaction-in-the-b
 
 All miners are fullnodes, but not all fullnodes are miners.
 Wallet apps are lightnodes.
+
+Why light nodes need blockchain header? -> May be they also store full block info but in of not all blocks
+
+https://viblo.asia/p/phan-loai-va-tam-quan-trong-cua-cac-node-trong-mang-blockchain-6J3Zg0JAlmB

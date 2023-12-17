@@ -3,6 +3,7 @@ package server
 import (
 	"crypto/sha256"
 	"log"
+	"math"
 )
 
 type MerkleNode struct {
@@ -55,7 +56,37 @@ func createMerkleLayer(lowerLayer []*MerkleNode) []*MerkleNode {
 	return result
 }
 
-func (tree *MerkleTree) GetMerklePath() [][]byte {
-	// TODO (Phuc) return hash values of required nodes in merkle tree to verify transaction, this method used by full node (server)
-	return nil
+func (tree *MerkleTree) GetMerklePath(index int) [][]byte {
+	height := tree.GetTreeHeight()
+	if height == 0 {
+		return nil
+	}
+	path := make([][]byte, height-1)
+	mid := float64(height) - 0.5
+	minIndex := 0
+	maxIndex := height*2 - 1
+	topNode := tree.Root
+	for i := height; i > 1; i-- {
+		if float64(index) > mid {
+			path[i-2] = topNode.Left.Hash
+			minIndex = int(math.Ceil(mid))
+			topNode = topNode.Right
+		} else {
+			path[i-2] = topNode.Right.Hash
+			maxIndex = int(math.Floor(mid))
+			topNode = topNode.Left
+		}
+		mid = (float64(minIndex) + float64(maxIndex)) / 2
+	}
+	return path
+}
+
+func (tree *MerkleTree) GetTreeHeight() int {
+	heigth := 0
+	node := tree.Root
+	for node != nil {
+		heigth++
+		node = node.Left
+	}
+	return heigth
 }
