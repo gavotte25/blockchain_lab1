@@ -1,9 +1,13 @@
-package main
+package server
 
-import "time"
+import (
+	"time"
+)
+
+const MinBlockTransactions = 1 // the minimum transactions of block is 3 (for easily debug)
 
 type Blockchain struct {
-	blocks []*Block
+	BlockArr []*Block
 }
 
 func InitBlockchain() *Blockchain {
@@ -11,20 +15,25 @@ func InitBlockchain() *Blockchain {
 	Transaction := "Init transaction"
 	PrevBlockHash := []byte{}
 	block := NewBlock(Transaction, PrevBlockHash)
-	blockchain := &Blockchain{blocks: []*Block{block}}
+	blockchain := &Blockchain{BlockArr: []*Block{block}}
 	return blockchain
 }
 
-func (bc *Blockchain) AddBlock(transaction_data string) {
-	PrevBlock := bc.blocks[len(bc.blocks)-1]
+func (bc *Blockchain) AddBlock(transaction_data string) bool {
+	NumberOfBlocks := len(bc.BlockArr)
+	PrevBlock := bc.BlockArr[NumberOfBlocks-1]
+	if NumberOfBlocks >= 1 && PrevBlock.GetNumberOfTransactionOnBlock() < MinBlockTransactions {
+		return false
+	}
 	block := NewBlock(transaction_data, PrevBlock.Hash)
-	bc.blocks = append(bc.blocks, block)
+	bc.BlockArr = append(bc.BlockArr, block)
+	return true
 }
 
 // Add a list of transactions
 func (bc *Blockchain) AddTransactions(transactionData []string) {
 	// Get the last block in the blockchain
-	prevBlock := bc.blocks[len(bc.blocks)-1]
+	prevBlock := bc.BlockArr[len(bc.BlockArr)-1]
 
 	for _, transaction := range transactionData {
 		// Try to add the transaction to the current block
@@ -37,19 +46,19 @@ func (bc *Blockchain) AddTransactions(transactionData []string) {
 		// If adding the transaction exceeds the block size limit, close the current block then create a new one
 		if !flag {
 			newBlock := NewBlock(transaction, prevBlock.Hash)
-			bc.blocks = append(bc.blocks, newBlock)
+			bc.BlockArr = append(bc.BlockArr, newBlock)
 		}
 
 	}
 }
 
 func (bc *Blockchain) GetNumberOfBlocks() int {
-	return len(bc.blocks)
+	return len(bc.BlockArr)
 }
 
 func (bc *Blockchain) GetNumberOfTransactionsOnChain() int {
 	var result int = 0
-	for _, i := range bc.blocks {
+	for _, i := range bc.BlockArr {
 		result += i.GetNumberOfTransactionOnBlock()
 	}
 	return result
