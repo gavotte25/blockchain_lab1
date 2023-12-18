@@ -33,11 +33,9 @@ to quickly create a Cobra application.`,
 			// If exists, read all the content of blockchain
 			var err error
 			bc, err := server.ReadJSONFromFile(blockNameJSON)
-			fmt.Println(bc)
 			// Add transaction data
 			if err == nil {
 				transaction_data, _ := cmd.Flags().GetString("data")
-				fmt.Println(transaction_data)
 				flag := bc.AddBlock(transaction_data)
 				if !flag {
 					message := fmt.Errorf("add block does not meet the constraint of the minimum %d transactions", server.MinBlockTransactions)
