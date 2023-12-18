@@ -17,7 +17,7 @@ var addBlockCmd = &cobra.Command{
 	Short: "Add a new block to the blockchain",
 	Long: `The "addblock" command allows you to add a new block to the blockchain.
 		
-	Example:
+	Usage:
 		blockchain_lab1 addblock --name (-n) myblockchain --data (-d) "A send to B an amount of 3 BTC"
 		  
 	This command adds a new block with the specified transaction data to the blockchain named "myblockchain".`,

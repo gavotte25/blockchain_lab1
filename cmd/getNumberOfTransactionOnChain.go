@@ -19,8 +19,8 @@ var getNumberOfTransactionOnChainCmd = &cobra.Command{
 	Long: `The "numtransaction" command retrieves the number of transactions on a specified blockchain.
 It requires the name of the blockchain as a parameter.
 
-	Example:
-	$ blockchain_lab1 numtransaction --name (-n) myblockchain
+	Usage:
+		blockchain_lab1 numtransaction --name (-n) myblockchain
 
 	This command will check if a blockchain with the specified name exists.
 	If it exists, it will read the blockchain content and print the number of transactions on the chain.`,

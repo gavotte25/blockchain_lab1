@@ -17,7 +17,7 @@ var createChainCmd = &cobra.Command{
 This command creates a new blockchain with the specified name. It initializes the blockchain
 with a genesis block and sets it as the current active blockchain.
 
-Example:
+Usage:
 	blockchain_lab1 createchain --name (-n) myblockchain
 
 This will create a new blockchain named "myblockchain".`,

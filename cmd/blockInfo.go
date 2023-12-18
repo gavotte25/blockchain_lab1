@@ -16,7 +16,9 @@ var chaininfoCmd = &cobra.Command{
 	Short: "Print the information of all blocks in the blockchain",
 	Long: `Simply print the information of all blocks. The information contains "Block address", "Block size", "Time stamp", "Number of transaction".
 
-	Usage: blockchain_lab1 chaininfo`,
+	Usage:
+		blockchain_lab1 chaininfo --name (-n) mychain
+	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		blockName, _ := cmd.Flags().GetString("name")
 		// Concate to create a json file

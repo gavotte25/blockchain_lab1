@@ -17,8 +17,8 @@ var getNumberOfBlockCmd = &cobra.Command{
 	Short: "Get the number of blocks in a blockchain",
 	Long: `Get the number of blocks in a blockchain. This command retrieves the total number of blocks in a specified blockchain.
 	
-		Example:
-		$ blockchain_lab1 getNumberOfBlock --name (-n) myblockchain`,
+	Usage:
+		blockchain_lab1 getNumberOfBlock --name (-n) myblockchain`,
 	Run: func(cmd *cobra.Command, args []string) {
 		blockName, _ := cmd.Flags().GetString("name")
 		// Concate to create a json file

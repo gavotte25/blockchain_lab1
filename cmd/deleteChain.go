@@ -14,10 +14,10 @@ var deletechainCmd = &cobra.Command{
 	Use:   "deletechain",
 	Short: "Delete a blockchain by name",
 	Long: `Delete a blockchain by name. This command allows you to delete a specific blockchain from the system.
-	 Provide the name of the blockchain as an argument.
+	Provide the name of the blockchain as an argument.
 
-	Example:
-	blockchain_lab1 deletechain --name (-n) myblockchain
+	Usage:
+		blockchain_lab1 deletechain --name (-n) myblockchain
 
 	This will delete the blockchain with the name "myblockchain" from the system.`,
 	Run: func(cmd *cobra.Command, args []string) {

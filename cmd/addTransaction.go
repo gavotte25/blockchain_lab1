@@ -21,7 +21,7 @@ var addTransactionCmd = &cobra.Command{
 	If the blockchain with the given name does not exist, it displays an error message.
 	Otherwise, it reads the content of the blockchain, adds the new transactions, and writes the updated blockchain back to file.
 
-	Example:
+	Usage:
 		blockchain_lab1 addtransaction --name (-n) myblockchain --data (-d) "A send to B an amount of 2 BTC" "B send to C an amount of 3 BTC"
 `,
 	Run: func(cmd *cobra.Command, args []string) {
