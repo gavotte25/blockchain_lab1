@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -17,6 +18,38 @@ func InitBlockchain() *Blockchain {
 	block := NewBlock(Transaction, PrevBlockHash)
 	blockchain := &Blockchain{BlockArr: []*Block{block}}
 	return blockchain
+}
+
+func CreateBlockchain(chainName string) {
+	// Check if chainName is exists
+	chainNameJSON := chainName + ".json"
+	isExist, _ := IsFileInDatabasePath(chainNameJSON)
+	if isExist {
+		fmt.Println("Attempting to create a blockchain failed. Either the name of blockchain already exists or an error occurs.")
+	} else {
+		bc := InitBlockchain()
+		err := WriteJSONToFile(chainNameJSON, bc)
+		if err == nil {
+			fmt.Printf("Create a blockchain with name %s successfully.\n", chainName)
+		} else {
+			fmt.Println("An error occurs when create a new blockchain.")
+		}
+	}
+}
+
+func DeleteBlockchain(chainName string) {
+	chainNameJSON := chainName + ".json"
+	isExist, _ := IsFileInDatabasePath(chainNameJSON)
+	if !isExist {
+		fmt.Println("Attempting to delete a blockchain failed. Either the blockchain does not exist or an error occurs.")
+	} else {
+		err := DeleteJSONFile(chainNameJSON)
+		if err == nil {
+			fmt.Printf("Delete a blockchain with name %s successfully.\n", chainName)
+		} else {
+			fmt.Printf("An error occurs when delete a blockchain with name %s.\n", chainName)
+		}
+	}
 }
 
 func (bc *Blockchain) AddBlock(transaction_data string) bool {
@@ -48,7 +81,6 @@ func (bc *Blockchain) AddTransactions(transactionData []string) {
 			newBlock := NewBlock(transaction, prevBlock.Hash)
 			bc.BlockArr = append(bc.BlockArr, newBlock)
 		}
-
 	}
 }
 
