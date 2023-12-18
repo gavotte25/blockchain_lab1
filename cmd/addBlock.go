@@ -14,13 +14,13 @@ import (
 // addBlockCmd represents the addBlock command
 var addBlockCmd = &cobra.Command{
 	Use:   "addblock",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Add a new block to the blockchain",
+	Long: `The "addblock" command allows you to add a new block to the blockchain.
+		
+	Example:
+		blockchain_lab1 addblock --name (-n) myblockchain --data (-d) "A send to B an amount of 3 BTC"
+		  
+	This command adds a new block with the specified transaction data to the blockchain named "myblockchain".`,
 	Run: func(cmd *cobra.Command, args []string) {
 		blockName, _ := cmd.Flags().GetString("name")
 		// Concate to create a json file

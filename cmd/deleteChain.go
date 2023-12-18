@@ -9,15 +9,17 @@ import (
 )
 
 // deleteChainCmd represents the deleteChain command
+// deletechainCmd represents the deletechain command
 var deletechainCmd = &cobra.Command{
 	Use:   "deletechain",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Delete a blockchain by name",
+	Long: `Delete a blockchain by name. This command allows you to delete a specific blockchain from the system.
+	 Provide the name of the blockchain as an argument.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Example:
+	blockchain_lab1 deletechain --name (-n) myblockchain
+
+	This will delete the blockchain with the name "myblockchain" from the system.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		blockName, _ := cmd.Flags().GetString("name")
 		server.DeleteBlockchain(blockName)

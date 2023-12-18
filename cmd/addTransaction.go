@@ -13,14 +13,16 @@ import (
 // addTransactionCmd represents the addTransaction command
 // It is used to add new transactions to an existing blockchain.
 var addTransactionCmd = &cobra.Command{
-	Use:   "addtransaction",
+	Use: "addtransaction",
+
 	Short: "Add new transactions to an existing blockchain",
 	Long: `The addtransaction command is used to add new transactions to an existing blockchain.
-It takes the name of the blockchain as an argument and the data for the transactions to be added.
-If the blockchain with the given name does not exist, it displays an error message.
-Otherwise, it reads the content of the blockchain, adds the new transactions, and writes the updated blockchain back to file.
+	It takes the name of the blockchain as an argument and the data for the transactions to be added.
+	If the blockchain with the given name does not exist, it displays an error message.
+	Otherwise, it reads the content of the blockchain, adds the new transactions, and writes the updated blockchain back to file.
 
-For example: blockchain_lab1 addtransaction -n "test" -d "A send to B an amount of 2 BTC" "B send to C an amount of 3 BTC"
+	Example:
+		blockchain_lab1 addtransaction --name (-n) myblockchain --data (-d) "A send to B an amount of 2 BTC" "B send to C an amount of 3 BTC"
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		blockName, _ := cmd.Flags().GetString("name")

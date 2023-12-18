@@ -11,15 +11,14 @@ import (
 )
 
 // getNumberOfBlockCmd represents the getNumberOfBlock command
+// code implementation
 var getNumberOfBlockCmd = &cobra.Command{
 	Use:   "numblock",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Get the number of blocks in a blockchain",
+	Long: `Get the number of blocks in a blockchain. This command retrieves the total number of blocks in a specified blockchain.
+	
+		Example:
+		$ blockchain_lab1 getNumberOfBlock --name (-n) myblockchain`,
 	Run: func(cmd *cobra.Command, args []string) {
 		blockName, _ := cmd.Flags().GetString("name")
 		// Concate to create a json file

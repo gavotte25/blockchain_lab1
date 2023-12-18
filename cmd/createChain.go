@@ -12,12 +12,15 @@ import (
 var createChainCmd = &cobra.Command{
 	Use:   "createchain",
 	Short: "Create a new blockchain",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Long: `createchain is a command that creates a new blockchain.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+This command creates a new blockchain with the specified name. It initializes the blockchain
+with a genesis block and sets it as the current active blockchain.
+
+Example:
+	blockchain_lab1 createchain --name (-n) myblockchain
+
+This will create a new blockchain named "myblockchain".`,
 	Run: func(cmd *cobra.Command, args []string) {
 		blockName, _ := cmd.Flags().GetString("name")
 		server.CreateBlockchain(blockName)

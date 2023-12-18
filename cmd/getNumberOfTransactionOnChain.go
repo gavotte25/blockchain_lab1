@@ -11,15 +11,19 @@ import (
 )
 
 // getNumberOfTransactionOnChainCmd represents the getNumberOfTransactionOnChain command
+// getNumberOfTransactionOnChainCmd represents the "numtransaction" command.
+// It retrieves the number of transactions on a specified blockchain.
 var getNumberOfTransactionOnChainCmd = &cobra.Command{
 	Use:   "numtransaction",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Retrieve the number of transactions on a blockchain",
+	Long: `The "numtransaction" command retrieves the number of transactions on a specified blockchain.
+It requires the name of the blockchain as a parameter.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Example:
+	$ blockchain_lab1 numtransaction --name (-n) myblockchain
+
+	This command will check if a blockchain with the specified name exists.
+	If it exists, it will read the blockchain content and print the number of transactions on the chain.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		blockName, _ := cmd.Flags().GetString("name")
 		// Concate to create a json file
