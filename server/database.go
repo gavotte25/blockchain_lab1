@@ -59,27 +59,6 @@ func WriteJSONToFile(filename string, data *Blockchain) error {
 	return nil
 }
 
-func AppendJSONToFile(filename string, data *Blockchain) error {
-	filePath := filepath.Join(database_path, filename)
-	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	jsonData, err := json.Marshal(data)
-	if err != nil {
-		return err
-	}
-
-	_, err = file.Write(jsonData)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func DeleteJSONFile(filename string) error {
 	filePath := filepath.Join(database_path, filename)
 	err := os.Remove(filePath)
