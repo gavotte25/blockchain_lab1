@@ -6,8 +6,7 @@ import (
 	"log"
 	"net/rpc"
 	"os"
-
-	"github.com/gavotte25/blockchain_lab1/server"
+	// "github.com/gavotte25/blockchain_lab1/server"
 )
 
 func Start() {
@@ -20,13 +19,12 @@ func Start() {
 	for {
 		fmt.Println("Press any key to call API")
 		_, err := reader.ReadString('\n')
-		args := &server.Args{7, 8}
-		var reply int
-		err = client.Call("Arith.Multiply", args, &reply)
+		var succeed bool
+		err = client.Call("Service.MakeTransaction", "Hello world", &succeed)
 		if err != nil {
-			log.Fatal("arith error:", err)
+			log.Fatal("Something wrong", err)
 		}
-		fmt.Printf("Arith: %d*%d=%d", args.A, args.B, reply)
+		fmt.Printf("Is success: %t", succeed)
 		fmt.Println("\n##################")
 	}
 }

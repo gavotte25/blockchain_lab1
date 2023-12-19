@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -20,6 +21,7 @@ func InitBlockchain() *Blockchain {
 }
 
 func (bc *Blockchain) AddBlock(transaction_data string) bool {
+	fmt.Println("AddBlock called")
 	NumberOfBlocks := len(bc.BlockArr)
 	PrevBlock := bc.BlockArr[NumberOfBlocks-1]
 	if NumberOfBlocks >= 1 && PrevBlock.GetNumberOfTransactionOnBlock() < MinBlockTransactions {
@@ -62,4 +64,32 @@ func (bc *Blockchain) GetNumberOfTransactionsOnChain() int {
 		result += i.GetNumberOfTransactionOnBlock()
 	}
 	return result
+}
+
+func (bc *Blockchain) VerifyTransaction(tx *Transaction, merklePath [][]byte) bool {
+	txLocation := bc.GetTransactionLocation(1)
+	blockIndex := txLocation[0]
+	txIndex := txLocation[1]
+	if blockIndex < 0 || txIndex < 0 {
+		return false
+	}
+	block := bc.GetBlock(blockIndex)
+	if block == nil {
+		return false
+	}
+	return block.VerifyTransaction(tx, merklePath)
+}
+
+// GetTransactionLocation returns array of block index and transaction index in that block. Return {-1, -1} if can't find
+func (bc *Blockchain) GetTransactionLocation(transactionId int) [2]int {
+	// TODO
+	return [2]int{-1, -1}
+}
+
+func (bc *Blockchain) GetBlock(index int) *Block {
+	if index < 0 || index > len(bc.BlockArr)-1 {
+		return nil
+	} else {
+		return bc.BlockArr[index]
+	}
 }

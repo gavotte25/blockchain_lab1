@@ -7,22 +7,45 @@ import (
 	"net/rpc"
 )
 
-// Sample codes to create a server in goroutine, no need no start sever in other terminal
-type Args struct {
-	A, B int
+// // Sample codes
+// type Args struct {
+// 	A, B int
+// }
+
+// type Arith int
+
+// func (t *Arith) Multiply(args *Args, reply *int) error {
+// 	*reply = args.A * args.B
+// 	return nil
+// }
+
+type Service struct {
+	blockchain *Blockchain
 }
 
-type Arith int
+func (s *Service) init() {
+	s.loadBlockchainDataFromFile()
+	if s.blockchain == nil {
+		s.blockchain = InitBlockchain()
+	}
+}
 
-func (t *Arith) Multiply(args *Args, reply *int) error {
-	*reply = args.A * args.B
+func (s *Service) MakeTransaction(txDetail string, result *bool) error {
+	resultBool := s.blockchain.AddBlock(txDetail)
+	result = &resultBool
 	return nil
+}
+
+func (s *Service) loadBlockchainDataFromFile() {
+	// TODO: assign blockchain value from file. If file does not exist, do nothing
+	s.blockchain = nil
 }
 
 func Start() {
 	log.Println("Server started")
-	arith := new(Arith)
-	rpc.Register(arith)
+	service := new(Service)
+	service.init()
+	rpc.Register(service)
 	rpc.HandleHTTP()
 	l, err := net.Listen("tcp", ":1234")
 	if err != nil {
