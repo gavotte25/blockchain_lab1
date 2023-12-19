@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -21,7 +20,6 @@ func InitBlockchain() *Blockchain {
 }
 
 func (bc *Blockchain) AddBlock(transaction_data string) bool {
-	fmt.Println("AddBlock called")
 	NumberOfBlocks := len(bc.BlockArr)
 	PrevBlock := bc.BlockArr[NumberOfBlocks-1]
 	if NumberOfBlocks >= 1 && PrevBlock.GetNumberOfTransactionOnBlock() < MinBlockTransactions {
@@ -92,4 +90,21 @@ func (bc *Blockchain) GetBlock(index int) *Block {
 	} else {
 		return bc.BlockArr[index]
 	}
+}
+
+func (bc *Blockchain) getLightVersion() *Blockchain {
+	lightBc := new(Blockchain)
+	lightBc.BlockArr = make([]*Block, len(bc.BlockArr))
+	for i := 0; i < len(bc.BlockArr); i++ {
+		lightBc.BlockArr[i] = bc.BlockArr[i].GetBlockHeader()
+	}
+	return lightBc
+}
+
+func (bc *Blockchain) GetVersionNumber() int {
+	return len(bc.BlockArr)
+}
+
+func (bc *Blockchain) Append(blocks []*Block) {
+	bc.BlockArr = append(bc.BlockArr, blocks...)
 }
