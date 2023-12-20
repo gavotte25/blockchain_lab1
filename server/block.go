@@ -90,3 +90,15 @@ func (block *Block) VerifyTransaction(tx *Transaction, merklePath [][]byte) bool
 	}
 	return hash == [32]byte(block.Hash)
 }
+
+func (block *Block) GetHash() [32]byte {
+	return [32]byte(block.Hash)
+}
+
+func (block *Block) GetBlockHeader() *Block {
+	header := new(Block)
+	header.Hash = block.Hash
+	header.PrevBlockHash = block.PrevBlockHash
+	header.Timestamp = block.Timestamp
+	return header
+}

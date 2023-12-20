@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -39,6 +40,25 @@ func (s *Service) MakeTransaction(txDetail string, result *bool) error {
 func (s *Service) loadBlockchainDataFromFile() {
 	// TODO: assign blockchain value from file. If file does not exist, do nothing
 	s.blockchain = nil
+}
+
+func (s *Service) GetBlockchainVersion(_ string, version *int) error {
+	*version = len(s.blockchain.BlockArr)
+	return nil
+}
+
+func (s *Service) SyncBlockchain(fromBlockIndex int, blocks *[]Block) error {
+	fmt.Println("SyncBlockchain called")
+	return nil
+}
+
+func (s *Service) GetBlockchain(headerOnly bool, bc *Blockchain) error {
+	if headerOnly {
+		bc = s.blockchain.getLightVersion()
+	} else {
+		bc = s.blockchain
+	}
+	return nil
 }
 
 func Start() {
