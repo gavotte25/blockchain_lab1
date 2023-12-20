@@ -2,13 +2,19 @@ package server
 
 import (
 	"crypto/sha256"
+	"encoding/binary"
+	"encoding/json"
 	"fmt"
+	"io"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/gavotte25/blockchain_lab1/utils"
+	//"github.com/gavotte25/blockchain_lab1/database"
 )
 
-const maxBlockSize = 128 * 1024 // the maximum size of block is 128 KB
+const maxBlockSize = 128 //* 1024 // the maximum size of block is 128 B = 2 transactions on each block
 
 type Block struct {
 	Timestamp     int64
@@ -51,9 +57,7 @@ func (block *Block) GetNumberOfTransactionOnBlock() int {
 }
 
 func (b *Block) AddTransaction(NewTransaction Transaction) bool {
-	//TransactionData := []byte(TransactionRaw)
-	// Check if adding the new transaction exceeds the block size limit
-	currentBlockSize := len(b.HashTransactions())
+	currentBlockSize := b.GetBlockSize()
 	newTransactionSize := len(NewTransaction.Data)
 
 	if currentBlockSize+newTransactionSize > maxBlockSize {
@@ -66,17 +70,18 @@ func (b *Block) AddTransaction(NewTransaction Transaction) bool {
 }
 
 func (block *Block) PrintInfo() {
-	fmt.Printf("Block address: %x\n", block.Hash)
-	fmt.Printf("Block size: %d bytes\n", len(block.HashTransactions()))
-	fmt.Printf("Created timestamp (UTC+0): %s\n", utils.GetTimestampFormat(block.Timestamp))
-	fmt.Printf("Number of Transactions: %d\n", len(block.Transactions))
+	utils.GetLog("info", fmt.Sprintf("Block address: %x", block.Hash))
+	utils.GetLog("info", fmt.Sprintf("Block size: %d bytes", block.GetBlockSize()))
+	utils.GetLog("info", fmt.Sprintf("Created timestamp (UTC+0): %s", utils.GetTimestampFormat(block.Timestamp)))
+	utils.GetLog("info", fmt.Sprintf("Number of Transactions: %d", len(block.Transactions)))
 }
 
 func (block *Block) PrintTransaction() {
 	for idx, transaction := range block.Transactions {
-		fmt.Printf("-- Transaction number: %d\n", idx)
-		fmt.Printf("-- Created timestamp (UTC+0): %s\n", utils.GetTimestampFormat(transaction.Timestamp))
-		fmt.Printf("-- Data: %x\n", transaction.Data)
+		utils.GetLog("info", fmt.Sprintf("-- Transaction index: %d", idx))
+		utils.GetLog("info", fmt.Sprintf("-- Created timestamp (UTC+0): %s",
+			utils.GetTimestampFormat(transaction.Timestamp)))
+		utils.GetLog("info", fmt.Sprintf("-- Data: %x", transaction.Data))
 	}
 }
 
@@ -101,4 +106,51 @@ func (block *Block) GetBlockHeader() *Block {
 	header.PrevBlockHash = block.PrevBlockHash
 	header.Timestamp = block.Timestamp
 	return header
+}
+
+func (b *Block) GetBlockSize() int {
+	blockSize := binary.Size(b.Timestamp)
+	blockSize += len(b.PrevBlockHash)
+	blockSize += len(b.Hash)
+	for _, tx := range b.Transactions {
+		blockSize += len(tx.Data)
+		blockSize += binary.Size(tx.Timestamp)
+	}
+	return blockSize
+}
+
+func (block *Block) SaveBlockAsJSON() error {
+	fileName := utils.GetStringEncode(block.Hash)
+	filePath := filepath.Join(DataBasePath, fileName+".json")
+	jsonData, err := json.Marshal(block)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(filePath, jsonData, 0644)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func loadBlockFromJSON(fileName string) *Block {
+	filePath := filepath.Join(DataBasePath, fileName+".json")
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil
+	}
+	defer file.Close()
+
+	jsonData, err := io.ReadAll(file)
+	if err != nil {
+		return nil
+	}
+
+	var block Block
+	err = json.Unmarshal(jsonData, &block)
+	if err != nil {
+		return nil
+	}
+
+	return &block
 }

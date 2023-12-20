@@ -31,7 +31,8 @@ func (w *Wallet) init() {
 
 func (w *Wallet) loadBlockchainDataFromFile() {
 	// TODO: assign blockchain value from file. If file does not exist, do nothing
-	w.blockchain = nil
+
+	w.blockchain = server.LoadBlockChainFromFile()
 }
 
 func (w *Wallet) fetchEntireBlockchain() {
