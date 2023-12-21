@@ -80,7 +80,25 @@ func (block *Block) PrintTransaction() {
 	}
 }
 
-func (block *Block) VerifyTransaction(tx *Transaction) bool {
-	// TODO (Phuc) using merkle tree, this method is used by light node (server)
-	return true
+func (block *Block) VerifyTransaction(tx *Transaction, merklePath [][]byte) bool {
+	if tx == nil || merklePath == nil || len(merklePath) == 0 {
+		return false
+	}
+	hash := sha256.Sum256(append(tx.Hash(), merklePath[0]...))
+	for i := 1; i < len(merklePath); i++ {
+		hash = sha256.Sum256(append(hash[:], merklePath[i]...))
+	}
+	return hash == [32]byte(block.Hash)
+}
+
+func (block *Block) GetHash() [32]byte {
+	return [32]byte(block.Hash)
+}
+
+func (block *Block) GetBlockHeader() *Block {
+	header := new(Block)
+	header.Hash = block.Hash
+	header.PrevBlockHash = block.PrevBlockHash
+	header.Timestamp = block.Timestamp
+	return header
 }
