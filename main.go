@@ -1,6 +1,10 @@
 package main
 
 import (
+	"bufio"
+	"fmt"
+	"os"
+
 	"github.com/gavotte25/blockchain_lab1/client"
 	"github.com/gavotte25/blockchain_lab1/server"
 )
@@ -12,17 +16,40 @@ func main() {
 	// 	message := fmt.Errorf("add block is not meet the constraint of the minimum %d transactions", server.MinBlockTransactions)
 	// 	log.Fatal(message)
 	// }
-	// // bc.AddBlock("Send 2 more BTC to Ivan")
-	// // bc.AddBlock("Send 10 more BTC to Ivan")
 
-	// fmt.Printf("Number of Transactions on Chain: %d\n", bc.GetNumberOfTransactionsOnChain())
-	// fmt.Printf("Number of blocks on Chain: %d\n", bc.GetNumberOfBlocks())
-	// for index, block := range bc.BlockArr {
-	// 	fmt.Printf("Block: %d\n", index)
-	// 	block.PrintInfo()
-	// 	//block.PrintTransaction()
+	// TxList := [10]string{"Send 1 BTC to Ivan",
+	// 	"Send 2 BTC to Ivan",
+	// 	"Send 3 BTC to Ivan",
+	// 	"Send 4 BTC to Ivan",
+	// 	"Send 5 BTC to Ivan",
+	// 	"Send 6 BTC to Ivan",
+	// 	"Send 7 BTC to Ivan",
+	// 	"Send 8 BTC to Ivan",
+	// 	"Send 9 BTC to Ivan",
+	// 	"Send 10 BTC to Ivan",
 	// }
+	// bc.AddTransactions(TxList[:])
 
-	server.Start()
-	client.Start()
+	// bc.SaveBlockChainAsJSON(true)
+	// bc := server.loadBlockChainFromFile()
+	// bc.BlockArr[0].PrintInfo()
+	args := os.Args
+	if len(args) > 1 {
+		switch option := args[1]; option {
+		case "server":
+			server.Start()
+			fmt.Println("Press enter to stop server")
+			bufio.NewReader(os.Stdin).ReadString('\n')
+		case "client":
+			debuggingEnabled := false
+			if len(args) > 2 {
+				mode := args[2]
+				debuggingEnabled = mode == "debug"
+			}
+			client.Start(debuggingEnabled)
+		}
+	} else {
+		server.Start()
+		client.Start(false)
+	}
 }

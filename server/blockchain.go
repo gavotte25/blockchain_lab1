@@ -1,55 +1,30 @@
 package server
 
 import (
-	"time"
+	"log"
+
+	"github.com/gavotte25/blockchain_lab1/utils"
 )
 
-const MinBlockTransactions = 1 // the minimum transactions of block is 3 (for easily debug)
+const BlockChainDBPath = "blockchainDB" // the file name of saved blockchain's data.
 
 type Blockchain struct {
 	BlockArr []*Block
 }
 
-func InitBlockchain() *Blockchain {
-	// Init the first block
-	Transaction := "Init transaction"
-	PrevBlockHash := []byte{}
-	block := NewBlock(Transaction, PrevBlockHash)
-	blockchain := &Blockchain{BlockArr: []*Block{block}}
-	return blockchain
+func (bc *Blockchain) Init() {
+	bc.BlockArr = make([]*Block, 0)
 }
 
-func (bc *Blockchain) AddBlock(transaction_data string) bool {
-	NumberOfBlocks := len(bc.BlockArr)
-	PrevBlock := bc.BlockArr[NumberOfBlocks-1]
-	if NumberOfBlocks >= 1 && PrevBlock.GetNumberOfTransactionOnBlock() < MinBlockTransactions {
-		return false
+func (bc *Blockchain) AddBlock(transactions []*Transaction) *Block {
+	var block *Block
+	if len(bc.BlockArr) == 0 {
+		block = NewBlock(transactions, nil)
+	} else {
+		block = NewBlock(transactions, bc.BlockArr[len(bc.BlockArr)-1])
 	}
-	block := NewBlock(transaction_data, PrevBlock.Hash)
 	bc.BlockArr = append(bc.BlockArr, block)
-	return true
-}
-
-// Add a list of transactions
-func (bc *Blockchain) AddTransactions(transactionData []string) {
-	// Get the last block in the blockchain
-	prevBlock := bc.BlockArr[len(bc.BlockArr)-1]
-
-	for _, transaction := range transactionData {
-		// Try to add the transaction to the current block
-		// -- True: successful
-		// -- False: over the limit size of block
-		CurrentTimestamp := time.Now().UTC().Unix()
-		NewTransaction := Transaction{Data: []byte(transaction), Timestamp: CurrentTimestamp}
-		flag := prevBlock.AddTransaction(NewTransaction)
-
-		// If adding the transaction exceeds the block size limit, close the current block then create a new one
-		if !flag {
-			newBlock := NewBlock(transaction, prevBlock.Hash)
-			bc.BlockArr = append(bc.BlockArr, newBlock)
-		}
-
-	}
+	return block
 }
 
 func (bc *Blockchain) GetNumberOfBlocks() int {
@@ -62,26 +37,6 @@ func (bc *Blockchain) GetNumberOfTransactionsOnChain() int {
 		result += i.GetNumberOfTransactionOnBlock()
 	}
 	return result
-}
-
-func (bc *Blockchain) VerifyTransaction(tx *Transaction, merklePath [][]byte) bool {
-	txLocation := bc.GetTransactionLocation(1)
-	blockIndex := txLocation[0]
-	txIndex := txLocation[1]
-	if blockIndex < 0 || txIndex < 0 {
-		return false
-	}
-	block := bc.GetBlock(blockIndex)
-	if block == nil {
-		return false
-	}
-	return block.VerifyTransaction(tx, merklePath)
-}
-
-// GetTransactionLocation returns array of block index and transaction index in that block. Return {-1, -1} if can't find
-func (bc *Blockchain) GetTransactionLocation(transactionId int) [2]int {
-	// TODO
-	return [2]int{-1, -1}
 }
 
 func (bc *Blockchain) GetBlock(index int) *Block {
@@ -107,4 +62,19 @@ func (bc *Blockchain) GetVersionNumber() int {
 
 func (bc *Blockchain) Append(blocks []*Block) {
 	bc.BlockArr = append(bc.BlockArr, blocks...)
+}
+
+func (bc *Blockchain) SaveMetaDataFile(dir string) error {
+	var orderedHashes []string
+	for _, block := range bc.BlockArr {
+		hashString := utils.GetStringEncode(block.Hash)
+		orderedHashes = append(orderedHashes, hashString)
+	}
+	err := utils.WriteFile(orderedHashes, "metadata.bc", dir)
+	if err != nil {
+		log.Panicln("SaveMetaDataFile to ", dir+"metadata.bc", " failed. Reason: ", err.Error())
+		return err
+	}
+
+	return nil
 }
