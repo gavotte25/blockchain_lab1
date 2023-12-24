@@ -7,7 +7,7 @@ import (
 	"github.com/gavotte25/blockchain_lab1/server"
 )
 
-const serverAddress = "localhost:1234"
+const serverAddress = server.ServerAddress
 
 type Repo struct {
 	client *rpc.Client
@@ -21,39 +21,41 @@ func (r *Repo) init() {
 	r.client = client
 }
 
-func (r *Repo) makeTransaction(txDetail string) bool {
-	var succeed bool
-	err := r.client.Call("Service.MakeTransaction", txDetail, &succeed)
-	if err != nil {
-		log.Fatal("Something wrong", err)
-	}
-	return succeed
+func (r *Repo) makeTransaction(txDetail string) (bool, error) {
+	var processing bool
+	err := r.client.Call("Service.MakeTransaction", txDetail, &processing)
+	return processing, err
 }
 
 // getBlockchainVersion returns the length of blockchain in fullnode / server
-func (r *Repo) getBlockchainVersion() int {
+func (r *Repo) getBlockchainVersion() (int, error) {
 	var version int
 	err := r.client.Call("Service.GetBlockchainVersion", "", &version)
-	if err != nil {
-		log.Fatal("Something wrong", err)
-	}
-	return version
+	return version, err
 }
 
-func (r *Repo) getNewBlocks(fromIndex int) []*server.Block {
+func (r *Repo) getNewBlocks(fromIndex int) ([]*server.Block, error) {
 	var blocks []*server.Block
 	err := r.client.Call("Service.SyncBlockchain", fromIndex, &blocks)
-	if err != nil {
-		log.Fatal("Something wrong", err)
-	}
-	return blocks
+	return blocks, err
 }
 
-func (r *Repo) getEntireBlockchain() *server.Blockchain {
+func (r *Repo) getEntireBlockchain() (*server.Blockchain, error) {
 	var bc server.Blockchain
 	err := r.client.Call("Service.GetBlockchain", true, &bc)
+	return &bc, err
+}
+
+func (r *Repo) saveBlockchainToDatabase(bc *server.Blockchain, dir string) error {
+	err := bc.SaveMetaDataFile(dir)
 	if err != nil {
-		log.Fatal("Something wrong", err)
+		return err
 	}
-	return &bc
+	for i := 0; i < len(bc.BlockArr); i++ {
+		err = bc.BlockArr[i].SaveBlockAsJSON(dir)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

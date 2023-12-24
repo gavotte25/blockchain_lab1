@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -14,8 +15,6 @@ import (
 	//"github.com/gavotte25/blockchain_lab1/database"
 )
 
-const maxBlockSize = 128 //* 1024 // the maximum size of block is 128 B = 2 transactions on each block
-
 type Block struct {
 	Timestamp     int64
 	Transactions  []*Transaction
@@ -25,7 +24,12 @@ type Block struct {
 
 func (block *Block) SetHash() {
 	timeBytes := utils.ConvertTimestampToByte(block.Timestamp)
-	hashInput := append(block.PrevBlockHash, block.HashTransactions()...)
+	var hashInput []byte
+	if block.PrevBlockHash != nil {
+		hashInput = append(block.PrevBlockHash, block.HashTransactions()...)
+	} else {
+		hashInput = block.HashTransactions()
+	}
 	hashInput = append(hashInput, timeBytes...)
 	hashOutput := sha256.Sum256(hashInput)
 	block.Hash = hashOutput[:]
@@ -35,19 +39,15 @@ func (block *Block) HashTransactions() []byte {
 	return CreateMerkleTree(block.Transactions).Root.Hash
 }
 
-func NewBlock(TransactionData string, prevBlockHash []byte) *Block {
-	hash := []byte{} // Assuming this is an empty byte slice; you need to calculate the hash
+func NewBlock(transactions []*Transaction, prevBlock *Block) *Block {
 	CurrentTimestamp := time.Now().UTC().Unix()
-	TransactionByte := []byte(TransactionData)
 	block := &Block{
-		Timestamp: CurrentTimestamp,
-		Transactions: []*Transaction{{Data: TransactionByte,
-			Timestamp: CurrentTimestamp},
-		},
-		PrevBlockHash: prevBlockHash,
-		Hash:          hash,
+		Timestamp:    CurrentTimestamp,
+		Transactions: transactions,
 	}
-
+	if prevBlock != nil {
+		block.PrevBlockHash = prevBlock.Hash
+	}
 	block.SetHash()
 	return block
 }
@@ -57,13 +57,6 @@ func (block *Block) GetNumberOfTransactionOnBlock() int {
 }
 
 func (b *Block) AddTransaction(NewTransaction Transaction) bool {
-	currentBlockSize := b.GetBlockSize()
-	newTransactionSize := len(NewTransaction.Data)
-
-	if currentBlockSize+newTransactionSize > maxBlockSize {
-		return false
-	}
-
 	b.Transactions = append(b.Transactions, &NewTransaction)
 	b.SetHash()
 	return true
@@ -119,9 +112,9 @@ func (b *Block) GetBlockSize() int {
 	return blockSize
 }
 
-func (block *Block) SaveBlockAsJSON() error {
+func (block *Block) SaveBlockAsJSON(dir string) error {
 	fileName := utils.GetStringEncode(block.Hash)
-	filePath := filepath.Join(DataBasePath, fileName+".json")
+	filePath := filepath.Join(dir, fileName+".json")
 	jsonData, err := json.Marshal(block)
 	if err != nil {
 		return err
@@ -133,24 +126,24 @@ func (block *Block) SaveBlockAsJSON() error {
 	return nil
 }
 
-func loadBlockFromJSON(fileName string) *Block {
-	filePath := filepath.Join(DataBasePath, fileName+".json")
+func LoadBlockFromJSON(fileName string, dir string) (*Block, error) {
+	filePath := filepath.Join(dir, fileName+".json")
 	file, err := os.Open(filePath)
 	if err != nil {
-		return nil
+		return nil, errors.New("Can't open file " + filePath + " reason: " + err.Error())
 	}
 	defer file.Close()
 
 	jsonData, err := io.ReadAll(file)
 	if err != nil {
-		return nil
+		return nil, errors.New("Can't read file " + filePath + " reason: " + err.Error())
 	}
 
 	var block Block
 	err = json.Unmarshal(jsonData, &block)
 	if err != nil {
-		return nil
+		return nil, errors.New("Can't unmarshal file " + filePath + " reason: " + err.Error())
 	}
 
-	return &block
+	return &block, nil
 }

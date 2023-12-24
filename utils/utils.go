@@ -6,11 +6,28 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 )
+
+type Logger struct {
+	Enable bool
+}
+
+func (l *Logger) Println(v ...any) {
+	if l.Enable {
+		log.Println(v...)
+	}
+}
+
+func (l *Logger) Panicln(v ...any) {
+	if l.Enable {
+		log.Panicln(v...)
+	}
+}
 
 // used to convert an int64 to a byte array
 func ConvertTimestampToByte(num int64) []byte {

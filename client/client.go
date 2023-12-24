@@ -8,42 +8,73 @@ import (
 	"time"
 
 	"github.com/gavotte25/blockchain_lab1/server"
+	"github.com/gavotte25/blockchain_lab1/utils"
 )
 
 const syncIntervalInSecond = 5
+const cacheDir = "./client/database"
 
 type Wallet struct {
 	blockchain *server.Blockchain
 	repo       *Repo
 	ticker     *time.Ticker
 	done       chan bool
+	logger     utils.Logger
 }
 
-func (w *Wallet) init() {
+func (w *Wallet) init(loggingEnabled bool) {
 	w.repo = new(Repo)
+	w.logger = utils.Logger{Enable: loggingEnabled}
 	w.repo.init()
+	w.blockchain = new(server.Blockchain)
+	w.blockchain.Init()
 	w.loadBlockchainDataFromFile()
-	if w.blockchain == nil {
+	if w.blockchain.GetVersionNumber() == 0 {
 		w.fetchEntireBlockchain()
 	}
 	w.sync()
 }
 
 func (w *Wallet) loadBlockchainDataFromFile() {
-	// TODO: assign blockchain value from file. If file does not exist, do nothing
-
-	w.blockchain = server.LoadBlockChainFromFile()
+	w.logger.Println("started loadBlockchainDataFromFile ", cacheDir+"metadata.bc")
+	arr := utils.ReadFile("metadata.bc", cacheDir)
+	if arr == nil {
+		w.logger.Panicln("loadBlockchainDataFromFile failed, reason: can't load metadata from path ", cacheDir+"/metadata.bc")
+	} else {
+		for _, blockFile := range arr {
+			block, err := server.LoadBlockFromJSON(blockFile, cacheDir)
+			if err != nil {
+				w.logger.Panicln("loadBlockchainDataFromFile failed, reason: ", err.Error())
+				return
+			}
+			w.blockchain.BlockArr = append(w.blockchain.BlockArr, block)
+		}
+	}
 }
 
 func (w *Wallet) fetchEntireBlockchain() {
-	w.blockchain = w.repo.getEntireBlockchain()
+	w.logger.Println("fetchEntireBlockchain started")
+	utils.WipeFolder(cacheDir)
+	var err error
+	w.blockchain, err = w.repo.getEntireBlockchain()
+	if err != nil {
+		w.logger.Println("fetchEntireBlockchain failed: ", err.Error())
+		return
+	}
+	err = w.repo.saveBlockchainToDatabase(w.blockchain, cacheDir)
+	if err != nil {
+		w.logger.Panicln("fetchEntireBlockchain failed: ", err.Error())
+	} else {
+		w.logger.Println("fetchEntireBlockchain succeed")
+	}
+
 }
 
 // sync periodically checks latest length of fullnode blockchain. If it's longer than local blockchain,
 // it will fetch the missing blocks and check the current local last block is valid,
 // if not valid, fetch the whole blockchain
 func (w *Wallet) sync() {
-	fmt.Println("Blockchain sync is enabled")
+	w.logger.Println("sync started at interval ", syncIntervalInSecond, " seconds")
 	w.ticker = time.NewTicker(time.Second * syncIntervalInSecond)
 	w.done = make(chan bool)
 	go func() {
@@ -53,15 +84,28 @@ func (w *Wallet) sync() {
 				return
 			case <-w.ticker.C:
 				localVersion := w.blockchain.GetVersionNumber()
-				fullNodeVersion := w.repo.getBlockchainVersion()
-				fmt.Println("1")
+				fullNodeVersion, err := w.repo.getBlockchainVersion()
+				if err != nil {
+					w.logger.Panicln("cannot fetch latest blockchain version from server, reason:  ", err.Error())
+					continue
+				}
 				if localVersion < fullNodeVersion {
 					if localVersion < 2 {
 						w.fetchEntireBlockchain()
 					} else {
-						newBlocks := w.repo.getNewBlocks(localVersion - 1)
+						newBlocks, err := w.repo.getNewBlocks(localVersion - 1)
+						if err != nil {
+							w.logger.Panicln("cannot fetch new blocks from server, reason:  ", err.Error())
+							continue
+						}
+						if len(newBlocks) == 0 {
+							continue
+						}
 						if w.blockchain.BlockArr[len(w.blockchain.BlockArr)-1].GetHash() == newBlocks[0].GetHash() {
 							w.blockchain.Append(newBlocks[1:])
+							for _, block := range newBlocks[1:] {
+								block.SaveBlockAsJSON(cacheDir)
+							}
 						} else {
 							w.fetchEntireBlockchain()
 						}
@@ -75,7 +119,17 @@ func (w *Wallet) sync() {
 }
 
 func (w *Wallet) makeTransaction(txDetail string) bool {
-	return w.repo.makeTransaction(txDetail)
+	success, err := w.repo.makeTransaction(txDetail)
+	if err != nil {
+		w.logger.Println("makeTransaction failed: ", err.Error())
+		return success
+	}
+	if success {
+		w.logger.Println("Transaction is being queued for processing")
+	} else {
+		w.logger.Println("Transaction is not accepted")
+	}
+	return success
 }
 
 func (w *Wallet) finish() {
@@ -87,16 +141,16 @@ func (w *Wallet) finish() {
 	}
 }
 
-func Start() {
+func Start(loggingEnabled bool) {
 	log.Println("Client started")
 	reader := bufio.NewReader(os.Stdin)
 	wallet := new(Wallet)
-	wallet.init()
+	wallet.init(loggingEnabled)
 	for {
 		fmt.Println("Type info and press enter to make transaction, type 'exit' to close")
 		info, err := reader.ReadString('\n')
 		if err != nil {
-			log.Fatal("Something wrong", err)
+			log.Fatal(err.Error())
 		}
 		if info == "exit\n" {
 			wallet.finish()
