@@ -1,10 +1,33 @@
 package utils
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/binary"
+	"encoding/hex"
+	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 )
+
+type Logger struct {
+	Enable bool
+}
+
+func (l *Logger) Println(v ...any) {
+	if l.Enable {
+		log.Println(v...)
+	}
+}
+
+func (l *Logger) Panicln(v ...any) {
+	if l.Enable {
+		log.Panicln(v...)
+	}
+}
 
 // used to convert an int64 to a byte array
 func ConvertTimestampToByte(num int64) []byte {
@@ -27,4 +50,76 @@ func ConvertTimestampToByte(num int64) []byte {
 func GetTimestampFormat(timestamp int64) string {
 	unixTimeUTC := time.Unix(timestamp, 0).Format("2006-01-02 15:04:05")
 	return unixTimeUTC
+}
+
+func WipeFolder(folderPath string) error {
+	targetFolder, err := os.Open(folderPath)
+	if err != nil {
+		return err
+	}
+
+	defer targetFolder.Close()
+	files, err := targetFolder.Readdir(-1)
+	if err != nil {
+		return err
+	}
+	for _, file := range files {
+		filePath := filepath.Join(folderPath, file.Name())
+		err := os.Remove(filePath)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func GetStringEncode(input []byte) string {
+	return hex.EncodeToString(input[:])
+}
+
+func GetLog(logType, message string) {
+	// Default logType to "INFO" if it is nil or empty
+	if logType == "" {
+		logType = "info"
+	}
+
+	// Format the current timestamp
+	timestamp := time.Now().Format("2006-01-02 15:04:05")
+
+	// Print the log to the screen
+	fmt.Printf("%s %s: %s\n", timestamp, strings.ToUpper(logType), strings.ToLower(message))
+}
+
+func WriteFile(data []string, fileName string, path string) error {
+	filePath := filepath.Join(path, fileName)
+	f, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	for _, row := range data {
+		_, err := f.WriteString(row + "\n")
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func ReadFile(fileName string, path string) []string {
+	filePath := filepath.Join(path, fileName)
+	f, err := os.Open(filePath)
+	if err != nil {
+		return nil
+	}
+	defer f.Close()
+	scanner := bufio.NewScanner(f)
+	var inputFiles []string
+	for scanner.Scan() {
+		inputFiles = append(inputFiles, scanner.Text())
+	}
+	if err := scanner.Err(); err != nil {
+		return nil
+	}
+	return inputFiles
 }

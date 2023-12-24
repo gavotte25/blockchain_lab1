@@ -1,2 +1,4 @@
 # Module requrement
 /vendor/
+/client/database/
+/server/database/
