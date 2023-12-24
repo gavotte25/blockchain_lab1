@@ -22,6 +22,12 @@ type Wallet struct {
 	logger     utils.Logger
 }
 
+func NewWallet() *Wallet {
+	wallet := new(Wallet)
+	wallet.init(true)
+	return wallet
+}
+
 func (w *Wallet) init(loggingEnabled bool) {
 	w.repo = new(Repo)
 	w.logger = utils.Logger{Enable: loggingEnabled}
