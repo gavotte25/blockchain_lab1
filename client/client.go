@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+
 	"os"
+
 	"time"
 
 	"github.com/gavotte25/blockchain_lab1/server"
@@ -141,6 +143,26 @@ func (w *Wallet) finish() {
 	}
 }
 
+// GetBlock
+func (w *Wallet) GetBlock(bIndex int) *server.Block {
+	success, err := w.repo.getBlock(bIndex)
+	if err != nil {
+		w.logger.Println("GetBlock failed: ", err.Error())
+		return nil
+	}
+	return success
+}
+
+// GetTransaction
+func (w *Wallet) GetTransaction(bIndex int, txIndex int) *server.Transaction {
+	success, err := w.repo.getTransaction(bIndex, txIndex)
+	if err != nil {
+		w.logger.Println("GetBlock failed: ", err.Error())
+		return nil
+	}
+	return success
+}
+
 func Start(loggingEnabled bool) {
 	log.Println("Client started")
 	reader := bufio.NewReader(os.Stdin)
@@ -149,14 +171,16 @@ func Start(loggingEnabled bool) {
 	for {
 		fmt.Println("Type info and press enter to make transaction, type 'exit' to close")
 		info, err := reader.ReadString('\n')
+		info = utils.TrimInputByOS(info)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
-		if info == "exit\n" {
+		if info == "exit" {
+			fmt.Printf("error %s", info)
 			wallet.finish()
 			break
 		}
-		fmt.Printf("Is success: %t", wallet.makeTransaction(info))
-		fmt.Println("\n##################")
+		fmt.Printf("Is success: %t\n", wallet.makeTransaction(info))
+		fmt.Println("##################")
 	}
 }

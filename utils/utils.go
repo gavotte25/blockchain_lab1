@@ -9,6 +9,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -122,4 +124,21 @@ func ReadFile(fileName string, path string) []string {
 		return nil
 	}
 	return inputFiles
+}
+
+func ConvertStringToInt(data string) (int, error) {
+	result, err := strconv.Atoi(data)
+	if err != nil {
+		return -1, err
+	}
+	return result, nil
+}
+
+func TrimInputByOS(input string) string {
+	if runtime.GOOS == "windows" {
+		input = strings.TrimRight(input, "\r\n")
+	} else {
+		input = strings.TrimRight(input, "\n")
+	}
+	return input
 }

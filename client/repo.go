@@ -59,3 +59,18 @@ func (r *Repo) saveBlockchainToDatabase(bc *server.Blockchain, dir string) error
 	}
 	return nil
 }
+
+// getBlock
+func (r *Repo) getBlock(blockIndex int) (*server.Block, error) {
+	var block *server.Block
+	err := r.client.Call("Service.GetBlock", blockIndex, &block)
+	return block, err
+}
+
+// getTransaction
+func (r *Repo) getTransaction(blockIndex int, transactionIndex int) (*server.Transaction, error) {
+	var tx *server.Transaction
+	txIndex := [2]int{blockIndex, transactionIndex}
+	err := r.client.Call("Service.GetTransaction", txIndex, &tx)
+	return tx, err
+}

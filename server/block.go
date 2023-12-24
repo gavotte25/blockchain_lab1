@@ -56,6 +56,14 @@ func (block *Block) GetNumberOfTransactionOnBlock() int {
 	return len(block.Transactions)
 }
 
+func (block *Block) getTransaction(index int) *Transaction {
+	if index < 0 || index > len(block.Transactions)-1 {
+		return nil
+	} else {
+		return block.Transactions[index]
+	}
+}
+
 func (b *Block) AddTransaction(NewTransaction Transaction) bool {
 	b.Transactions = append(b.Transactions, &NewTransaction)
 	b.SetHash()
