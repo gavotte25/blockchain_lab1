@@ -24,7 +24,7 @@ type Wallet struct {
 
 func NewWallet() *Wallet {
 	wallet := new(Wallet)
-	wallet.init(true)
+	wallet.init(false)
 	return wallet
 }
 
@@ -124,7 +124,7 @@ func (w *Wallet) sync() {
 	}()
 }
 
-func (w *Wallet) makeTransaction(txDetail string) bool {
+func (w *Wallet) MakeTransaction(txDetail string) bool {
 	success, err := w.repo.makeTransaction(txDetail)
 	if err != nil {
 		w.logger.Println("makeTransaction failed: ", err.Error())
@@ -138,7 +138,7 @@ func (w *Wallet) makeTransaction(txDetail string) bool {
 	return success
 }
 
-func (w *Wallet) finish() {
+func (w *Wallet) Finish() {
 	if w.ticker != nil {
 		w.ticker.Stop()
 	}
@@ -159,10 +159,10 @@ func Start(loggingEnabled bool) {
 			log.Fatal(err.Error())
 		}
 		if info == "exit\n" {
-			wallet.finish()
+			wallet.Finish()
 			break
 		}
-		fmt.Printf("Is success: %t", wallet.makeTransaction(info))
+		fmt.Printf("Is success: %t", wallet.MakeTransaction(info))
 		fmt.Println("\n##################")
 	}
 }

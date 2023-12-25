@@ -1,11 +1,7 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"os"
-
-	"github.com/gavotte25/blockchain_lab1/client"
+	"github.com/gavotte25/blockchain_lab1/app"
 	"github.com/gavotte25/blockchain_lab1/server"
 )
 
@@ -33,23 +29,25 @@ func main() {
 	// bc.SaveBlockChainAsJSON(true)
 	// bc := server.loadBlockChainFromFile()
 	// bc.BlockArr[0].PrintInfo()
-	args := os.Args
-	if len(args) > 1 {
-		switch option := args[1]; option {
-		case "server":
-			server.Start()
-			fmt.Println("Press enter to stop server")
-			bufio.NewReader(os.Stdin).ReadString('\n')
-		case "client":
-			debuggingEnabled := false
-			if len(args) > 2 {
-				mode := args[2]
-				debuggingEnabled = mode == "debug"
-			}
-			client.Start(debuggingEnabled)
-		}
-	} else {
-		server.Start()
-		client.Start(false)
-	}
+	// args := os.Args
+	// if len(args) > 1 {
+	// 	switch option := args[1]; option {
+	// 	case "server":
+	// 		server.Start()
+	// 		fmt.Println("Press enter to stop server")
+	// 		bufio.NewReader(os.Stdin).ReadString('\n')
+	// 	case "client":
+	// 		debuggingEnabled := false
+	// 		if len(args) > 2 {
+	// 			mode := args[2]
+	// 			debuggingEnabled = mode == "debug"
+	// 		}
+	// 		client.Start(debuggingEnabled)
+	// 	}
+	// } else {
+	// 	server.Start()
+	// 	client.Start(false)
+	// }
+	server.Start()
+	app.Run()
 }

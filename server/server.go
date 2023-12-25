@@ -94,7 +94,7 @@ func (s *Service) MakeTransaction(txDetail string, result *bool) error {
 }
 
 func (s *Service) GetBlockchainVersion(_ string, version *int) error {
-	log.Println("GetBlockchainVersion")
+	//log.Println("GetBlockchainVersion")
 	*version = len(s.blockchain.BlockArr)
 	return nil
 }
