@@ -272,12 +272,11 @@ func Start(loggingEnabled bool) {
 		if err != nil {
 			log.Fatal(err.Error())
 		}
-		if info == "exit" {
-			fmt.Printf("error %s", info)
+		if info == "exit\n" {
 			wallet.Finish()
 			break
 		}
-    fmt.Printf("Is success: %t\n", wallet.MakeTransaction(info))
-		fmt.Println("##################")
+		fmt.Printf("Is success: %t", wallet.MakeTransaction(info))
+		fmt.Println("\n##################")
 	}
 }
