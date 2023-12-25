@@ -66,7 +66,7 @@ func Client(w *client.Wallet) bool {
 		} else {
 			isSuccess := w.MakeTransaction(info)
 			if isSuccess {
-				fmt.Println("Transaction is made successfully. Press Enter to continue")
+				fmt.Println("Success! Your transaction is ready to verify. Press Enter to continue")
 				fmt.Scanln()
 			} else {
 				fmt.Println("Transaction is made unsuccessfully. Press Enter to continue")
