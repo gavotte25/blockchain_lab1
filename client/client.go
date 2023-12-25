@@ -132,6 +132,10 @@ func (w *Wallet) sync() {
 }
 
 func (w *Wallet) MakeTransaction(txDetail string) bool {
+	return w.makeTransaction(txDetail)
+}
+
+func (w *Wallet) MakeTransaction(txDetail string) bool {
 	tx := server.Transaction{Timestamp: time.Now().Unix(), Data: []byte(txDetail)}
 
 	// save into history.tx
