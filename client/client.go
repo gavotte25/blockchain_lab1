@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+
 	"os"
 	"strconv"
 	"strings"
@@ -267,8 +268,6 @@ func Start(loggingEnabled bool) {
 	for {
 		fmt.Println("Type info and press enter to make transaction, type 'exit' to close")
 		info, err := reader.ReadString('\n')
-		info = utils.TrimInputByOS(info)
-		//info := "hello"
 		if err != nil {
 			log.Fatal(err.Error())
 		}
