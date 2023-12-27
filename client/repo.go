@@ -21,9 +21,9 @@ func (r *Repo) init() {
 	r.client = client
 }
 
-func (r *Repo) makeTransaction(txDetail string) (bool, error) {
+func (r *Repo) makeTransaction(tx server.Transaction) (bool, error) {
 	var processing bool
-	err := r.client.Call("Service.MakeTransaction", txDetail, &processing)
+	err := r.client.Call("Service.MakeTransaction", tx, &processing)
 	return processing, err
 }
 
@@ -73,4 +73,11 @@ func (r *Repo) getTransaction(blockIndex int, transactionIndex int) (*server.Tra
 	txIndex := [2]int{blockIndex, transactionIndex}
 	err := r.client.Call("Service.GetTransaction", txIndex, &tx)
 	return tx, err
+}
+
+// verifyTransaction
+func (r *Repo) verifyTransaction(transaction *server.Transaction) (*server.Args, error) {
+	var args *server.Args
+	err := r.client.Call("Service.VerifyTransaction", transaction, &args)
+	return args, err
 }

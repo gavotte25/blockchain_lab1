@@ -55,7 +55,7 @@ func (block *Block) GetNumberOfTransactionOnBlock() int {
 	return len(block.Transactions)
 }
 
-func (block *Block) getTransaction(index int) *Transaction {
+func (block *Block) GetTransaction(index int) *Transaction {
 	if index < 0 || index > len(block.Transactions)-1 {
 		return nil
 	} else {
@@ -124,11 +124,11 @@ func (block *Block) SaveBlockAsJSON(dir string) error {
 	filePath := filepath.Join(dir, fileName+".json")
 	jsonData, err := json.Marshal(block)
 	if err != nil {
-		return err
+		return errors.New("Can't marshall file " + filePath + " reason: " + err.Error())
 	}
 	err = os.WriteFile(filePath, jsonData, 0644)
 	if err != nil {
-		return err
+		return errors.New("Can't read file " + filePath + " reason: " + err.Error())
 	}
 	return nil
 }
