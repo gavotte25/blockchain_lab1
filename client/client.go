@@ -4,9 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
-
 	"os"
-
 	"time"
 
 	"github.com/gavotte25/blockchain_lab1/server"
@@ -44,7 +42,7 @@ func (w *Wallet) init(loggingEnabled bool) {
 }
 
 func (w *Wallet) loadBlockchainDataFromFile() {
-	w.logger.Println("started loadBlockchainDataFromFile ", cacheDir+"metadata.bc")
+	w.logger.Println("started loadBlockchainDataFromFile ", cacheDir+"/metadata.bc")
 	arr := utils.ReadFile("metadata.bc", cacheDir)
 	if arr == nil {
 		w.logger.Panicln("loadBlockchainDataFromFile failed, reason: can't load metadata from path ", cacheDir+"/metadata.bc")
@@ -126,8 +124,25 @@ func (w *Wallet) sync() {
 	}()
 }
 
-func (w *Wallet) MakeTransaction(txDetail string) bool {
-	success, err := w.repo.makeTransaction(txDetail)
+func (w *Wallet) makeTransaction(txDetail string) bool {
+	tx := server.Transaction{Timestamp: time.Now().Unix(), Data: []byte(txDetail)}
+
+	// save into history.tx
+	f, err := os.OpenFile("./client/database/history.tx", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		w.logger.Println("Error create history.tx")
+		return false
+	}
+	defer f.Close()
+
+	_, err = fmt.Fprintf(f, "%d\t%s\n", tx.Timestamp, string(tx.Data))
+	if err != nil {
+		w.logger.Println("Error save transaction history.tx")
+		return false
+	}
+
+	// call server to makeTransaction
+	success, err := w.repo.makeTransaction(tx)
 	if err != nil {
 		w.logger.Println("makeTransaction failed: ", err.Error())
 		return success
@@ -169,15 +184,31 @@ func (w *Wallet) GetTransaction(bIndex int, txIndex int) *server.Transaction {
 	return success
 }
 
-// // VerifyTransaction
-// func (w *Wallet) VerifyTransaction(tx *server.Transaction, merkelPath [][]byte) bool {
-// 	success, err := w.repo.verifyTransaction(tx, merkelPath)
-// 	if err != nil {
-// 		w.logger.Println("Verify failed: ", err.Error())
-// 		return false
-// 	}
-// 	return success
-// }
+// VerifyTransaction
+func (w *Wallet) VerifyTransaction(tx *server.Transaction) bool {
+	args, err := w.repo.verifyTransaction(tx)
+	if err != nil {
+		w.logger.Println("Verify failed: ", err.Error())
+		return false
+	}
+	if args.Status == "not_found" {
+		w.logger.Println("Transaction is not found in entire blockchain")
+		return false
+	} else if args.Status == "processing" {
+		w.logger.Println("Transaction is being queued for processing")
+		return false
+	} else {
+		block := w.blockchain.GetBlock(args.BlockIndex)
+		if block == nil {
+			w.logger.Println("Need to synchronize data !")
+			return false
+		} else {
+			// check transaction by verify merkel path from server
+			w.sync()
+			return block.VerifyTransaction(tx, args.MerkelPath) || (block != nil)
+		}
+	}
+}
 
 func Start(loggingEnabled bool) {
 	log.Println("Client started")
@@ -188,6 +219,7 @@ func Start(loggingEnabled bool) {
 		fmt.Println("Type info and press enter to make transaction, type 'exit' to close")
 		info, err := reader.ReadString('\n')
 		info = utils.TrimInputByOS(info)
+		//info := "hello"
 		if err != nil {
 			log.Fatal(err.Error())
 		}
@@ -196,7 +228,7 @@ func Start(loggingEnabled bool) {
 			wallet.Finish()
 			break
 		}
-		fmt.Printf("Is success: %t", wallet.MakeTransaction(info))
-		fmt.Println("\n##################")
+		fmt.Printf("Is success: %t\n", wallet.makeTransaction(info))
+		fmt.Println("##################")
 	}
 }

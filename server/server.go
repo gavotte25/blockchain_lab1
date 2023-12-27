@@ -1,7 +1,9 @@
 package server
 
 import (
+	"bytes"
 	"errors"
+	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -23,6 +25,12 @@ import (
 // 	*reply = args.A * args.B
 // 	return nil
 // }
+
+type Args struct {
+	MerkelPath [][]byte
+	Status     string
+	BlockIndex int
+}
 
 const ServerAddress = "localhost:1234"
 
@@ -85,10 +93,9 @@ func (s *Service) finish() {
 	s.done <- true
 }
 
-func (s *Service) MakeTransaction(txDetail string, result *bool) error {
-	log.Println("MakeTransaction: ", txDetail)
-	currentTimestamp := time.Now().UTC().Unix()
-	s.txStack <- &Transaction{[]byte(txDetail), currentTimestamp}
+func (s *Service) MakeTransaction(tx Transaction, result *bool) error {
+	log.Println("MakeTransaction: ", string(tx.Data))
+	s.txStack <- &tx
 	*result = true
 	return nil
 }
@@ -165,8 +172,53 @@ func (s *Service) GetTransaction(txIndex [2]int, transaction *Transaction) error
 	log.Println("GetTransaction")
 	blockIndex, transactionIndex := txIndex[0], txIndex[1]
 	block := s.blockchain.GetBlock(blockIndex)
-	*transaction = *block.getTransaction(transactionIndex)
+	*transaction = *block.GetTransaction(transactionIndex)
 	return nil
+}
+
+func (s *Service) IsTransactionInChannel(tx *Transaction) bool {
+
+	timeout := time.After(5 * time.Second)
+
+	for {
+		select {
+		case t := <-s.txStack:
+			if bytes.Equal(tx.Hash(), t.Hash()) {
+				return true
+			}
+		case <-timeout:
+			return false
+		}
+	}
+}
+
+func (s *Service) VerifyTransaction(tx *Transaction, agrs *Args) error {
+	log.Println("VerifyTransaction")
+	// check in queue
+	target_agrs := &Args{Status: "processing", BlockIndex: -1, MerkelPath: [][]byte{}}
+	isInQueue := s.IsTransactionInChannel(tx)
+	if isInQueue {
+		*agrs = *target_agrs
+		return nil
+	} else {
+		hashCode := utils.GetStringEncode(tx.Hash())
+		if value, ok := s.transactionIdx.Index[hashCode]; ok {
+			blockIndex, txIndex := value.BlockIndex, value.TransactionIndex
+			block := s.blockchain.GetBlock(blockIndex)
+			target_agrs.Status = "found"
+			target_agrs.MerkelPath = CreateMerkleTree(block.Transactions).GetMerklePath(txIndex)
+			target_agrs.BlockIndex = value.BlockIndex
+			*agrs = *target_agrs
+			fmt.Println(agrs.BlockIndex, agrs.MerkelPath)
+			return nil
+		} else {
+			target_agrs.Status = "not_found"
+			*agrs = *target_agrs
+			fmt.Println(agrs.Status)
+			return nil
+		}
+
+	}
 }
 
 func Start() {
