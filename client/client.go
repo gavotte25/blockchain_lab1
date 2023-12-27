@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gavotte25/blockchain_lab1/server"
@@ -20,6 +22,11 @@ type Wallet struct {
 	ticker     *time.Ticker
 	done       chan bool
 	logger     utils.Logger
+}
+
+type Pair struct {
+	Id      string
+	Content string
 }
 
 func NewWallet() *Wallet {
@@ -124,7 +131,7 @@ func (w *Wallet) sync() {
 	}()
 }
 
-func (w *Wallet) makeTransaction(txDetail string) bool {
+func (w *Wallet) MakeTransaction(txDetail string) bool {
 	tx := server.Transaction{Timestamp: time.Now().Unix(), Data: []byte(txDetail)}
 
 	// save into history.tx
@@ -210,6 +217,44 @@ func (w *Wallet) VerifyTransaction(tx *server.Transaction) bool {
 	}
 }
 
+func (w *Wallet) PrintBlock(bIndex int) bool {
+	block := w.GetBlock(bIndex)
+	if block == nil {
+		fmt.Println("Your block does not exist.")
+		return false
+	}
+	block.PrintInfo()
+	block.PrintTransaction()
+	return true
+}
+
+func (w *Wallet) ReadTransactionFile() ([]server.Transaction, error) {
+	filePath := "./client/database/history.tx"
+	file, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+	//fmt.Println("Contents of file:", string(file))
+
+	var transactions []server.Transaction
+	file_str := strings.Split(string(file), "\n")
+	leng := len(file_str)
+	for _, trans := range file_str[0 : leng-1] {
+		//fmt.Println(trans)
+		parts := strings.Split(trans, "\t")
+		str_id := parts[0]
+		content := parts[1]
+		id, _ := strconv.ParseInt(str_id, 10, 64)
+		transaction := server.Transaction{Data: []byte(content), Timestamp: id}
+		transactions = append(transactions, transaction)
+	}
+
+	if len(transactions) == 0 {
+		return nil, nil
+	}
+	return transactions, nil
+}
+
 func Start(loggingEnabled bool) {
 	log.Println("Client started")
 	reader := bufio.NewReader(os.Stdin)
@@ -225,11 +270,11 @@ func Start(loggingEnabled bool) {
 		}
 		if info == "exit" {
 			fmt.Printf("error %s", info)
-			wallet.finish()
+			wallet.Finish()
 			break
 		}
 
-		fmt.Printf("Is success: %t\n", wallet.makeTransaction(info))
+		fmt.Printf("Is success: %t\n", wallet.MakeTransaction(info))
 		fmt.Println("##################")
 	}
 }
