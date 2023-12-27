@@ -79,6 +79,10 @@ func GetStringEncode(input []byte) string {
 	return hex.EncodeToString(input[:])
 }
 
+func GetStringDecode(input []byte) string {
+	return hex.EncodeToString(input[:])
+}
+
 func GetLog(logType, message string) {
 	// Default logType to "INFO" if it is nil or empty
 	if logType == "" {
