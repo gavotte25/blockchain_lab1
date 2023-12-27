@@ -273,7 +273,7 @@ func Start(loggingEnabled bool) {
 		}
 		if info == "exit" {
 			fmt.Printf("error %s", info)
-			wallet.finish()
+			wallet.Finish()
 			break
 		}
 
