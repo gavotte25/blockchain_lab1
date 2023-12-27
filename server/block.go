@@ -93,7 +93,16 @@ func (block *Block) VerifyTransaction(tx *Transaction, merklePath [][]byte) bool
 	for i := 1; i < len(merklePath); i++ {
 		hash = sha256.Sum256(append(hash[:], merklePath[i]...))
 	}
-	return hash == [32]byte(block.Hash)
+	timeBytes := utils.ConvertTimestampToByte(block.Timestamp)
+	var hashInput []byte
+	if block.PrevBlockHash != nil {
+		hashInput = append(block.PrevBlockHash, hash[:]...)
+	} else {
+		hashInput = hash[:]
+	}
+	hashInput = append(hashInput, timeBytes...)
+	hashOutput := sha256.Sum256(hashInput)
+	return hashOutput == [32]byte(block.Hash)
 }
 
 func (block *Block) GetHash() [32]byte {
