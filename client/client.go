@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+
 	"os"
 	"strconv"
 	"strings"
@@ -272,7 +273,8 @@ func Start(loggingEnabled bool) {
 		if err != nil {
 			log.Fatal(err.Error())
 		}
-		if info == "exit\n" {
+		if info == "exit" {
+			fmt.Printf("error %s", info)
 			wallet.Finish()
 			break
 		}
