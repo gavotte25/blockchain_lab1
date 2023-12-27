@@ -155,6 +155,20 @@ func (s *Service) loadBlockChainFromFile() error {
 	return nil
 }
 
+func (s *Service) GetBlock(blockIndex int, block *Block) error {
+	log.Println("GetBlock")
+	*block = *s.blockchain.GetBlock(blockIndex)
+	return nil
+}
+
+func (s *Service) GetTransaction(txIndex [2]int, transaction *Transaction) error {
+	log.Println("GetTransaction")
+	blockIndex, transactionIndex := txIndex[0], txIndex[1]
+	block := s.blockchain.GetBlock(blockIndex)
+	*transaction = *block.getTransaction(transactionIndex)
+	return nil
+}
+
 func Start() {
 	log.Println("Server started")
 	service := new(Service)
