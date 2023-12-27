@@ -24,11 +24,6 @@ type Wallet struct {
 	logger     utils.Logger
 }
 
-type Pair struct {
-	Id      string
-	Content string
-}
-
 func NewWallet() *Wallet {
 	wallet := new(Wallet)
 	wallet.init(false)
@@ -228,11 +223,11 @@ func (w *Wallet) PrintBlock(bIndex int) bool {
 		return false
 	}
 	block.PrintInfo()
-	block.PrintTransaction()
+	//block.PrintTransaction()
 	return true
 }
 
-func (w *Wallet) ReadTransactionFile() ([]server.Transaction, error) {
+func (w *Wallet) ReadTransactionFile() ([]*server.Transaction, error) {
 	filePath := "./client/database/history.tx"
 	file, err := os.ReadFile(filePath)
 	if err != nil {
@@ -240,7 +235,7 @@ func (w *Wallet) ReadTransactionFile() ([]server.Transaction, error) {
 	}
 	//fmt.Println("Contents of file:", string(file))
 
-	var transactions []server.Transaction
+	var transactions []*server.Transaction
 	file_str := strings.Split(string(file), "\n")
 	leng := len(file_str)
 	for _, trans := range file_str[0 : leng-1] {
@@ -249,7 +244,7 @@ func (w *Wallet) ReadTransactionFile() ([]server.Transaction, error) {
 		str_id := parts[0]
 		content := parts[1]
 		id, _ := strconv.ParseInt(str_id, 10, 64)
-		transaction := server.Transaction{Data: []byte(content), Timestamp: id}
+		transaction := &server.Transaction{Data: []byte(content), Timestamp: id}
 		transactions = append(transactions, transaction)
 	}
 
