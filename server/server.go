@@ -27,7 +27,7 @@ import (
 // }
 
 type Args struct {
-	MerkelPath [][]byte
+	MerkelPath *MerklePath
 	Status     string
 	BlockIndex int
 }
@@ -195,7 +195,7 @@ func (s *Service) IsTransactionInChannel(tx *Transaction) bool {
 func (s *Service) VerifyTransaction(tx *Transaction, agrs *Args) error {
 	log.Println("VerifyTransaction")
 	// check in queue
-	target_agrs := &Args{Status: "processing", BlockIndex: -1, MerkelPath: [][]byte{}}
+	target_agrs := &Args{Status: "processing", BlockIndex: -1, MerkelPath: nil}
 	isInQueue := s.IsTransactionInChannel(tx)
 	if isInQueue {
 		*agrs = *target_agrs

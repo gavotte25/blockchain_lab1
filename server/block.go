@@ -85,13 +85,22 @@ func (block *Block) PrintTransaction() {
 	}
 }
 
-func (block *Block) VerifyTransaction(tx *Transaction, merklePath [][]byte) bool {
-	if tx == nil || merklePath == nil || len(merklePath) == 0 {
+func (block *Block) VerifyTransaction(tx *Transaction, merklePath *MerklePath) bool {
+	if tx == nil || merklePath == nil || merklePath.Steps == nil || merklePath.Direction == nil || len(merklePath.Steps) == 0 {
 		return false
 	}
-	hash := sha256.Sum256(append(tx.Hash(), merklePath[0]...))
-	for i := 1; i < len(merklePath); i++ {
-		hash = sha256.Sum256(append(hash[:], merklePath[i]...))
+	var hash [32]byte
+	if merklePath.Direction[0] {
+		hash = sha256.Sum256(append(tx.Hash(), merklePath.Steps[0]...))
+	} else {
+		hash = sha256.Sum256(append(merklePath.Steps[0], tx.Hash()...))
+	}
+	for i := 1; i < len(merklePath.Steps); i++ {
+		if merklePath.Direction[i] {
+			hash = sha256.Sum256(append(hash[:], merklePath.Steps[i]...))
+		} else {
+			hash = sha256.Sum256(append(merklePath.Steps[i], hash[:]...))
+		}
 	}
 	timeBytes := utils.ConvertTimestampToByte(block.Timestamp)
 	var hashInput []byte
