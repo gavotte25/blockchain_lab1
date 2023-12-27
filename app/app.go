@@ -55,7 +55,6 @@ func Run() bool {
 
 	switch choice {
 	case 1:
-
 		//fmt.Println("Login selected")
 		wallet := client.NewWallet()
 		for {
