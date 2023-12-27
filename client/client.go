@@ -24,11 +24,6 @@ type Wallet struct {
 	logger     utils.Logger
 }
 
-type Pair struct {
-	Id      string
-	Content string
-}
-
 func NewWallet() *Wallet {
 	wallet := new(Wallet)
 	wallet.init(false)
