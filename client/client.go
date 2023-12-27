@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"log"
-
 	"os"
 	"strconv"
 	"strings"
@@ -278,7 +277,7 @@ func Start(loggingEnabled bool) {
 			wallet.Finish()
 			break
 		}
-		fmt.Printf("Is success: %t", wallet.MakeTransaction(info))
-		fmt.Println("\n##################")
+		fmt.Printf("Is success: %t\n", wallet.MakeTransaction(info))
+		fmt.Println("##################")
 	}
 }
