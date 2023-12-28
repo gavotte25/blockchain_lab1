@@ -161,6 +161,7 @@ func DeleteVerifiedRowInFile(dir string, filename string, valueToRemove string) 
 	for scanner.Scan() {
 		scannerValue := strings.Replace(scanner.Text(), "\t", "", -1)
 		scannerValue = strings.Replace(scannerValue, "\n", "", -1)
+		fmt.Println(scannerValue)
 		if scannerValue == valueToRemove {
 			continue
 		} else {
