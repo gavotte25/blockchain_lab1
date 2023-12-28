@@ -1,6 +1,7 @@
 package server
 
 import (
+	//"bytes"
 	"bytes"
 	"errors"
 	"fmt"
@@ -9,7 +10,6 @@ import (
 	"net/http"
 	"net/rpc"
 	"sync"
-	"time"
 
 	"github.com/gavotte25/blockchain_lab1/utils"
 )
@@ -52,6 +52,7 @@ type Service struct {
 	transactionIdx *TransactionIndex
 	txStack        chan *Transaction
 	done           chan bool
+	queue          Queue
 }
 
 const MinBlockTransactions = 4 // the minimum transactions of block is 4 (for easily debug)
@@ -68,22 +69,23 @@ func (s *Service) init() {
 	}
 	s.txStack = make(chan *Transaction)
 	s.done = make(chan bool)
+	s.queue = Queue{transactions: make([]*Transaction, 0)}
 	go func() {
-		queue := Queue{transactions: make([]*Transaction, 0)}
+		//queue := Queue{transactions: make([]*Transaction, 0)}
 		for {
 			select {
 			case <-s.done:
 				return
 			case transaction := <-s.txStack:
-				queue.mu.Lock()
-				queue.push(transaction)
-				if len(queue.transactions) >= MinBlockTransactions {
-					block := s.blockchain.AddBlock(queue.transactions)
+				s.queue.mu.Lock()
+				s.queue.push(transaction)
+				if len(s.queue.transactions) >= MinBlockTransactions {
+					block := s.blockchain.AddBlock(s.queue.transactions)
 					block.SaveBlockAsJSON(cacheDir)
 					s.blockchain.SaveMetaDataFile(cacheDir)
-					queue.clear()
+					s.queue.clear()
 				}
-				queue.mu.Unlock()
+				s.queue.mu.Unlock()
 			}
 		}
 	}()
@@ -103,6 +105,7 @@ func (s *Service) MakeTransaction(tx Transaction, result *bool) error {
 func (s *Service) GetBlockchainVersion(_ string, version *int) error {
 	log.Println("GetBlockchainVersion")
 	*version = len(s.blockchain.BlockArr)
+	//s.blockchain.BlockArr[len(s.blockchain.BlockArr)-1].PrintTransaction()
 	return nil
 }
 
@@ -177,19 +180,14 @@ func (s *Service) GetTransaction(txIndex [2]int, transaction *Transaction) error
 }
 
 func (s *Service) IsTransactionInChannel(tx *Transaction) bool {
-
-	timeout := time.After(5 * time.Second)
-
-	for {
-		select {
-		case t := <-s.txStack:
-			if bytes.Equal(tx.Hash(), t.Hash()) {
-				return true
-			}
-		case <-timeout:
-			return false
+	isFound := false
+	for _, i := range s.queue.transactions {
+		if bytes.Equal(i.Hash(), tx.Hash()) {
+			isFound = true
+			break
 		}
 	}
+	return isFound
 }
 
 func (s *Service) VerifyTransaction(tx *Transaction, agrs *Args) error {
@@ -207,9 +205,9 @@ func (s *Service) VerifyTransaction(tx *Transaction, agrs *Args) error {
 			block := s.blockchain.GetBlock(blockIndex)
 			target_agrs.Status = "found"
 			target_agrs.MerkelPath = CreateMerkleTree(block.Transactions).GetMerklePath(txIndex)
-			target_agrs.BlockIndex = value.BlockIndex
+			target_agrs.BlockIndex = blockIndex
 			*agrs = *target_agrs
-			fmt.Println(agrs.BlockIndex, agrs.MerkelPath)
+			fmt.Println(agrs.BlockIndex, agrs.MerkelPath, agrs.Status)
 			return nil
 		} else {
 			target_agrs.Status = "not_found"
