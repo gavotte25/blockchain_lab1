@@ -77,19 +77,19 @@ func Run() bool {
 
 func drawTableHeader(option2 bool) {
 	if !option2 {
-		fmt.Printf("| %-4s | %-10s | %-100s |\n", "No.", "Id", "Content")
-		fmt.Println(strings.Repeat("-", 124))
+		fmt.Printf("| %-4s | %-10s | %-40s |\n", "No.", "Id", "Content")
+		fmt.Println(strings.Repeat("-", 64))
 	} else {
-		fmt.Printf("| %-4s | %-10s | %-100s | %-10s |\n", "No.", "Id", "Content", "Status")
-		fmt.Println(strings.Repeat("-", 137))
+		fmt.Printf("| %-4s | %-10s | %-40s | %-10s |\n", "No.", "Id", "Content", "Status")
+		fmt.Println(strings.Repeat("-", 77))
 	}
 }
 
 func drawOnePair(no int, tx *server.Transaction, option2 bool, verified_status string) {
 	if !option2 {
-		fmt.Printf("| %-4d | %-10d | %-100s |\n", no, tx.Timestamp, strings.TrimSpace(string(tx.Data[:])))
+		fmt.Printf("| %-4d | %-10d | %-40s |\n", no, tx.Timestamp, strings.TrimSpace(string(tx.Data[:])))
 	} else {
-		fmt.Printf("| %-4d | %-10d | %-100s | %-10s |\n", no, tx.Timestamp, strings.TrimSpace(string(tx.Data[:])), verified_status)
+		fmt.Printf("| %-4d | %-10d | %-40s | %-10s |\n", no, tx.Timestamp, strings.TrimSpace(string(tx.Data[:])), verified_status)
 	}
 }
 
