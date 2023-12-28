@@ -42,7 +42,7 @@ func (r *Repo) getNewBlocks(fromIndex int) ([]*server.Block, error) {
 
 func (r *Repo) getEntireBlockchain() (*server.Blockchain, error) {
 	var bc server.Blockchain
-	err := r.client.Call("Service.GetBlockchain", true, &bc)
+	err := r.client.Call("Service.GetBlockchain", false, &bc) // Set headerOnly = false because not enough time to handle Transaction caching at Client side
 	return &bc, err
 }
 

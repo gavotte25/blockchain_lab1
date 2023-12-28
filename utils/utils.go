@@ -146,3 +146,26 @@ func TrimInputByOS(input string) string {
 	}
 	return input
 }
+
+func DeleteVerifiedRowInFile(dir string, filename string, valueToRemove string) error {
+	inFile, _ := os.OpenFile(dir+"/"+filename, os.O_RDWR, 0644)
+	defer inFile.Close()
+	scanner := bufio.NewScanner(inFile)
+	inFile.Seek(0, 0)
+	lineNum := 0
+	var data []string
+	for scanner.Scan() {
+		if scanner.Text() == valueToRemove {
+			continue
+		} else {
+			// Skip writing this line
+			lineNum++
+			data = append(data, scanner.Text())
+		}
+	}
+	err := WriteFile(data, filename, dir)
+	if err != nil {
+		return err
+	}
+	return nil
+}

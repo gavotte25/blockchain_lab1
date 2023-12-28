@@ -16,6 +16,11 @@ type MerkleTree struct {
 	Root *MerkleNode
 }
 
+type MerklePath struct {
+	Steps     [][]byte
+	Direction []bool
+}
+
 func CreateMerkleTree(transactions []*Transaction) *MerkleTree {
 	if len(transactions) == 0 {
 		return nil
@@ -56,23 +61,27 @@ func createMerkleLayer(lowerLayer []*MerkleNode) []*MerkleNode {
 	return result
 }
 
-func (tree *MerkleTree) GetMerklePath(index int) [][]byte {
+func (tree *MerkleTree) GetMerklePath(index int) *MerklePath {
 	height := tree.GetTreeHeight()
 	if height == 0 {
 		return nil
 	}
-	path := make([][]byte, height-1)
+	path := new(MerklePath)
+	path.Steps = make([][]byte, height-1)
+	path.Direction = make([]bool, height-1)
 	mid := float64(height) - 0.5
 	minIndex := 0
 	maxIndex := height*2 - 1
 	topNode := tree.Root
 	for i := height; i > 1; i-- {
 		if float64(index) > mid {
-			path[i-2] = topNode.Left.Hash
+			path.Steps[i-2] = topNode.Left.Hash
+			path.Direction[i-2] = false
 			minIndex = int(math.Ceil(mid))
 			topNode = topNode.Right
 		} else {
-			path[i-2] = topNode.Right.Hash
+			path.Steps[i-2] = topNode.Right.Hash
+			path.Direction[i-2] = true
 			maxIndex = int(math.Floor(mid))
 			topNode = topNode.Left
 		}

@@ -154,6 +154,9 @@ func (w *Wallet) MakeTransaction(txDetail string) bool {
 	} else {
 		w.logger.Println("Transaction is not accepted")
 	}
+	// Test
+	// flag := w.VerifyTransaction(&tx)
+	// fmt.Println("test flag: ", flag)
 	return success
 }
 
@@ -188,7 +191,9 @@ func (w *Wallet) GetTransaction(bIndex int, txIndex int) *server.Transaction {
 
 // VerifyTransaction
 func (w *Wallet) VerifyTransaction(tx *server.Transaction) bool {
+	tx = w.blockchain.BlockArr[0].GetTransaction(0)
 	args, err := w.repo.verifyTransaction(tx)
+
 	if err != nil {
 		w.logger.Println("Verify failed: ", err.Error())
 		return false
@@ -201,13 +206,18 @@ func (w *Wallet) VerifyTransaction(tx *server.Transaction) bool {
 		return false
 	} else {
 		block := w.blockchain.GetBlock(args.BlockIndex)
+
 		if block == nil {
 			w.logger.Println("Need to synchronize data !")
 			return false
 		} else {
 			// check transaction by verify merkel path from server
-			w.sync()
-			return block.VerifyTransaction(tx, args.MerkelPath) || (block != nil)
+			isVerified := block.VerifyTransaction(tx, args.MerkelPath)
+			if isVerified {
+				txDetail := fmt.Sprintf("%d", tx.Timestamp) + string(tx.Data)
+				utils.DeleteVerifiedRowInFile(cacheDir, "history.tx", txDetail)
+			}
+			return isVerified
 		}
 	}
 }
@@ -267,8 +277,7 @@ func Start(loggingEnabled bool) {
 			wallet.Finish()
 			break
 		}
-
-		fmt.Printf("Is success: %t\n", wallet.MakeTransaction(info))
+    fmt.Printf("Is success: %t\n", wallet.MakeTransaction(info))
 		fmt.Println("##################")
 	}
 }

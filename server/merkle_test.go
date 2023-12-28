@@ -14,19 +14,28 @@ func TestGetMerklePath(t *testing.T) {
 	}
 	tree := CreateMerkleTree(transactions)
 	index := 5
-	expect := make([][]byte, 3)
-	expect[2] = tree.Root.Left.Hash
+	expect := new(MerklePath)
+	steps := make([][]byte, 3)
+	steps[2] = tree.Root.Left.Hash
 	tmp := tree.Root.Right
-	expect[1] = tmp.Right.Hash
+	steps[1] = tmp.Right.Hash
 	tmp = tmp.Left
-	expect[0] = tmp.Left.Hash
+	steps[0] = tmp.Left.Hash
 	result := tree.GetMerklePath(index)
-	if len(result) != 3 {
+	expect.Steps = steps
+	expect.Direction = []bool{false, true, false}
+	if len(result.Steps) != 3 {
 		t.Errorf("Path does not have enough length")
 	}
 	for i := 0; i < 3; i++ {
-		if string(expect[i][:]) != string(result[i][:]) {
-			t.Errorf("Path mismatch!")
+		if string(expect.Steps[i][:]) != string(result.Steps[i][:]) {
+			t.Errorf("Steps mismatch!")
+			break
+		}
+	}
+	for i := 0; i < 3; i++ {
+		if expect.Direction[i] != result.Direction[i] {
+			t.Errorf("Directions mismatch!")
 			break
 		}
 	}
