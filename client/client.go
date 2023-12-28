@@ -62,7 +62,7 @@ func (w *Wallet) loadBlockchainDataFromFile() {
 
 func (w *Wallet) fetchEntireBlockchain() {
 	w.logger.Println("fetchEntireBlockchain started")
-	utils.WipeFolder(cacheDir)
+	// utils.WipeFolder(cacheDir) // Disable this line of code to avoid deleting neccessary files. Those files should have been store somewhere else
 	var err error
 	w.blockchain, err = w.repo.getEntireBlockchain()
 	if err != nil {
