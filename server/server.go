@@ -103,7 +103,7 @@ func (s *Service) MakeTransaction(tx Transaction, result *bool) error {
 }
 
 func (s *Service) GetBlockchainVersion(_ string, version *int) error {
-	log.Println("GetBlockchainVersion")
+	//log.Println("GetBlockchainVersion")
 	*version = len(s.blockchain.BlockArr)
 	//s.blockchain.BlockArr[len(s.blockchain.BlockArr)-1].PrintTransaction()
 	return nil
@@ -220,7 +220,7 @@ func (s *Service) VerifyTransaction(tx *Transaction, agrs *Args) error {
 }
 
 func Start() {
-	log.Println("Server started")
+	//log.Println("Server started")
 	service := new(Service)
 	service.init()
 	rpc.Register(service)
@@ -229,6 +229,6 @@ func Start() {
 	if err != nil {
 		log.Fatal("listen error:", err)
 	}
-	log.Println("Listening at: ", ServerAddress)
+	//log.Println("Listening at: ", ServerAddress)
 	go http.Serve(l, nil)
 }

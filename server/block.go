@@ -70,10 +70,14 @@ func (b *Block) AddTransaction(NewTransaction Transaction) bool {
 }
 
 func (block *Block) PrintInfo() {
-	utils.GetLog("info", fmt.Sprintf("Block address: %x", block.Hash))
-	utils.GetLog("info", fmt.Sprintf("Block size: %d bytes", block.GetBlockSize()))
-	utils.GetLog("info", fmt.Sprintf("Created timestamp (UTC+0): %s", utils.GetTimestampFormat(block.Timestamp)))
-	utils.GetLog("info", fmt.Sprintf("Number of Transactions: %d", len(block.Transactions)))
+	fmt.Printf("Block address: %x\n", block.Hash)
+	fmt.Printf("Block size: %d bytes\n", block.GetBlockSize())
+	fmt.Printf("Created timestamp (UTC+0): %s\n", utils.GetTimestampFormat(block.Timestamp))
+	fmt.Printf("Number of Transactions: %d\n", len(block.Transactions))
+	// utils.GetLog("INFO", fmt.Sprintf("Block address: %x", block.Hash))
+	// utils.GetLog("INFO", fmt.Sprintf("Block size: %d bytes", block.GetBlockSize()))
+	// utils.GetLog("INFO", fmt.Sprintf("Created timestamp (UTC+0): %s", utils.GetTimestampFormat(block.Timestamp)))
+	// utils.GetLog("INFO", fmt.Sprintf("Number of Transactions: %d", len(block.Transactions)))
 }
 
 func (block *Block) PrintTransaction() {
