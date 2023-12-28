@@ -53,6 +53,10 @@ func Run() bool {
 	fmt.Print("Please select an option: ")
 
 	choice := makeSelection()
+	if choice == -1 {
+		fmt.Println("Your choice is not an integer number.")
+		return false
+	}
 
 	switch choice {
 	case 1:
@@ -123,7 +127,7 @@ func makeSelection() int {
 	input, _ := reader.ReadString('\n')
 	selection, err := strconv.Atoi(strings.TrimSpace(input))
 	if err != nil {
-		fmt.Println("Your selection is invalid. Please try again.")
+		//fmt.Println("Your selection is invalid. Please try again.")
 		return -1
 	}
 	return selection
@@ -139,6 +143,10 @@ func Client(w *client.Wallet) (string, bool) {
 	var message string
 	//var choice int
 	choice := makeSelection()
+	if choice == -1 {
+		message = "Your choice is not an integer number. Press Enter to try again."
+		return message, true
+	}
 	//fmt.Println(err)
 	//fmt.Printf("Your choice is %d\n", choice)
 	switch choice {
@@ -185,19 +193,18 @@ func Client(w *client.Wallet) (string, bool) {
 		}
 
 		fmt.Print("Select the No. of block: ")
-		reader := bufio.NewReader(os.Stdin)
-		input, _ := reader.ReadString('\n')
-		selection, err := strconv.Atoi(strings.TrimSpace(input))
-		if err != nil {
-			log.Fatal(err.Error())
+		n_block := makeSelection()
+		if n_block == -1 {
+			message = "Your selection is invalid. Press Enter to try again"
+			return message, true
 		}
-		if selection >= len(blockNames)-1 {
+		if n_block >= len(blockNames)-1 {
 			message = "Your selection is out of range. Press Enter to try again."
 			return message, true
 		}
 
 		// read the file of block
-		block, _ := server.LoadBlockFromJSON(blockNames[selection], dir)
+		block, _ := server.LoadBlockFromJSON(blockNames[n_block], dir)
 		transactions := block.Transactions
 		unverifiedTransaction, error := w.ReadTransactionFile()
 		//fmt.Println(transactions)
@@ -205,7 +212,7 @@ func Client(w *client.Wallet) (string, bool) {
 			unverifiedTransaction = nil
 		}
 		clearConsole()
-		w.PrintBlock(selection)
+		w.PrintBlock(n_block)
 		drawTable(transactions, unverifiedTransaction, true)
 		message = "Press Enter to continue."
 		return message, true
@@ -224,6 +231,10 @@ func Client(w *client.Wallet) (string, bool) {
 		fmt.Print("Select the No. of transaction you want to verify: ")
 		var selection int
 		selection = makeSelection()
+		if selection == -1 {
+			message = "Your selection is invalid. Press Enter to try again."
+			return message, true
+		}
 		if selection >= len(transactions) {
 			message = "Your selection is out of range. Press Enter to try again."
 			return message, true
