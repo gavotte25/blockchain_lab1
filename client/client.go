@@ -261,7 +261,7 @@ func (w *Wallet) ReadTransactionFile() ([]*server.Transaction, error) {
 }
 
 func Start(loggingEnabled bool) {
-	log.Println("Client started")
+	//log.Println("Client started")
 	reader := bufio.NewReader(os.Stdin)
 	wallet := new(Wallet)
 	wallet.init(loggingEnabled)

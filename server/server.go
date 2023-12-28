@@ -96,7 +96,7 @@ func (s *Service) finish() {
 }
 
 func (s *Service) MakeTransaction(tx Transaction, result *bool) error {
-	log.Println("MakeTransaction: ", string(tx.Data))
+	//log.Println("MakeTransaction: ", string(tx.Data))
 	s.txStack <- &tx
 	*result = true
 	return nil
@@ -110,13 +110,13 @@ func (s *Service) GetBlockchainVersion(_ string, version *int) error {
 }
 
 func (s *Service) SyncBlockchain(fromBlockIndex int, blocks *[]*Block) error {
-	log.Println("SyncBlockchain: ", fromBlockIndex)
+	//log.Println("SyncBlockchain: ", fromBlockIndex)
 	*blocks = s.blockchain.BlockArr[fromBlockIndex:]
 	return nil
 }
 
 func (s *Service) GetBlockchain(headerOnly bool, bc *Blockchain) error {
-	log.Println("GetBlockchain")
+	//log.Println("GetBlockchain")
 	if headerOnly {
 		*bc = *s.blockchain.getLightVersion()
 	} else {
@@ -166,13 +166,13 @@ func (s *Service) loadBlockChainFromFile() error {
 }
 
 func (s *Service) GetBlock(blockIndex int, block *Block) error {
-	log.Println("GetBlock")
+	//log.Println("GetBlock")
 	*block = *s.blockchain.GetBlock(blockIndex)
 	return nil
 }
 
 func (s *Service) GetTransaction(txIndex [2]int, transaction *Transaction) error {
-	log.Println("GetTransaction")
+	//log.Println("GetTransaction")
 	blockIndex, transactionIndex := txIndex[0], txIndex[1]
 	block := s.blockchain.GetBlock(blockIndex)
 	*transaction = *block.GetTransaction(transactionIndex)
@@ -191,7 +191,7 @@ func (s *Service) IsTransactionInChannel(tx *Transaction) bool {
 }
 
 func (s *Service) VerifyTransaction(tx *Transaction, agrs *Args) error {
-	log.Println("VerifyTransaction")
+	//log.Println("VerifyTransaction")
 	// check in queue
 	target_agrs := &Args{Status: "processing", BlockIndex: -1, MerkelPath: nil}
 	isInQueue := s.IsTransactionInChannel(tx)
