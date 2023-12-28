@@ -165,10 +165,16 @@ func Client(w *client.Wallet) (string, bool) {
 		data, err := os.ReadFile(filePath)
 		if err != nil {
 			message = "Your blockchain has no block. Make more transactions and try again. Press Enter to continue."
+			return message, true
 		}
 		blockNames := strings.Split(string(data), "\n")
 		dir := "server/database"
 		// list the blockname
+
+		if len(blockNames) == 0 {
+			message = "Your blockchain has no block. Make more transactions and try again. Press Enter to continue."
+			return message, true
+		}
 		clearConsole()
 		fmt.Printf("| %-4s | %-64s |\n", "No.", "Block address")
 		fmt.Println("---------------------------------------------------------------------------")
