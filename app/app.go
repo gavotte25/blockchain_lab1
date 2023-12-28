@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/gavotte25/blockchain_lab1/client"
@@ -27,6 +28,7 @@ func init() {
 		cmd.Stdout = os.Stdout
 		cmd.Run()
 	}
+
 }
 
 func CallClear() {
@@ -39,7 +41,8 @@ func CallClear() {
 }
 
 func clearConsole() {
-	CallClear()
+	//CallClear()
+	fmt.Print("\033[H\033[2J")
 }
 
 func Run() bool {
@@ -49,8 +52,7 @@ func Run() bool {
 	fmt.Println("0. Exit")
 	fmt.Println("Please select an option:")
 
-	var choice int
-	fmt.Scanln(&choice)
+	choice := makeSelection()
 
 	switch choice {
 	case 1:
@@ -62,8 +64,9 @@ func Run() bool {
 			if !state {
 				break
 			}
+			// clear buffer
 			fmt.Println(message)
-			fmt.Scanln()
+			bufio.NewReader(os.Stdin).ReadBytes('\n')
 		}
 	case 0:
 		fmt.Println("Your session is over. See you later.")
@@ -115,6 +118,17 @@ func drawTable(transactions []*server.Transaction, unverifiedTransaction []*serv
 
 }
 
+func makeSelection() int {
+	reader := bufio.NewReader(os.Stdin)
+	input, _ := reader.ReadString('\n')
+	selection, err := strconv.Atoi(strings.TrimSpace(input))
+	if err != nil {
+		fmt.Println("Your selection is invalid. Please try again.")
+		return -1
+	}
+	return selection
+}
+
 func Client(w *client.Wallet) (string, bool) {
 	fmt.Println("==== LOGGIN' IN ====")
 	fmt.Println("1. Make transaction")
@@ -123,9 +137,8 @@ func Client(w *client.Wallet) (string, bool) {
 	fmt.Println("0. Exit")
 	fmt.Printf("Please select an option: ")
 	var message string
-	var choice int
 	//var choice int
-	fmt.Scanln(&choice)
+	choice := makeSelection()
 	//fmt.Println(err)
 	//fmt.Printf("Your choice is %d\n", choice)
 	switch choice {
@@ -166,8 +179,12 @@ func Client(w *client.Wallet) (string, bool) {
 		}
 
 		fmt.Print("Select the No. of block: ")
-		var selection int
-		fmt.Scan(&selection)
+		reader := bufio.NewReader(os.Stdin)
+		input, _ := reader.ReadString('\n')
+		selection, err := strconv.Atoi(strings.TrimSpace(input))
+		if err != nil {
+			log.Fatal(err.Error())
+		}
 		if selection >= len(blockNames)-1 {
 			message = "Your selection is out of range. Press Enter to try again."
 			return message, true
@@ -200,7 +217,7 @@ func Client(w *client.Wallet) (string, bool) {
 		// choose a transaction based on no.
 		fmt.Print("Select the No. of transaction you want to verify: ")
 		var selection int
-		fmt.Scan(&selection)
+		selection = makeSelection()
 		if selection >= len(transactions) {
 			message = "Your selection is out of range. Press Enter to try again."
 			return message, true
