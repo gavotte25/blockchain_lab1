@@ -50,7 +50,7 @@ func Run() bool {
 	fmt.Println("Welcome to the blockchain application!")
 	fmt.Println("1. Sign up")
 	fmt.Println("0. Exit")
-	fmt.Println("Please select an option:")
+	fmt.Print("Please select an option: ")
 
 	choice := makeSelection()
 
