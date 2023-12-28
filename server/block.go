@@ -81,7 +81,7 @@ func (block *Block) PrintTransaction() {
 		utils.GetLog("info", fmt.Sprintf("-- Transaction index: %d", idx))
 		utils.GetLog("info", fmt.Sprintf("-- Created timestamp (UTC+0): %s",
 			utils.GetTimestampFormat(transaction.Timestamp)))
-		utils.GetLog("info", fmt.Sprintf("-- Data: %x", transaction.Data))
+		utils.GetLog("info", fmt.Sprintf("-- Data: %s", string(transaction.Data)))
 	}
 }
 
