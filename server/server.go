@@ -4,7 +4,6 @@ import (
 	//"bytes"
 	"bytes"
 	"errors"
-	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -207,12 +206,12 @@ func (s *Service) VerifyTransaction(tx *Transaction, agrs *Args) error {
 			target_agrs.MerkelPath = CreateMerkleTree(block.Transactions).GetMerklePath(txIndex)
 			target_agrs.BlockIndex = blockIndex
 			*agrs = *target_agrs
-			fmt.Println(agrs.BlockIndex, agrs.MerkelPath, agrs.Status)
+			//fmt.Println(agrs.BlockIndex, agrs.MerkelPath, agrs.Status)
 			return nil
 		} else {
 			target_agrs.Status = "not_found"
 			*agrs = *target_agrs
-			fmt.Println(agrs.Status)
+			//fmt.Println(agrs.Status)
 			return nil
 		}
 

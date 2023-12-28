@@ -77,19 +77,19 @@ func Run() bool {
 
 func drawTableHeader(option2 bool) {
 	if !option2 {
-		fmt.Printf("| %-4s | %-10s | %-20s |\n", "No.", "Id", "Content")
-		fmt.Println("---------------------------------------------------------------------------")
+		fmt.Printf("| %-4s | %-10s | %-100s |\n", "No.", "Id", "Content")
+		fmt.Println(strings.Repeat("-", 124))
 	} else {
-		fmt.Printf("| %-4s | %-10s | %-20s | %-10s |\n", "No.", "Id", "Content", "Status")
-		fmt.Println("---------------------------------------------------------------------------")
+		fmt.Printf("| %-4s | %-10s | %-100s | %-10s |\n", "No.", "Id", "Content", "Status")
+		fmt.Println(strings.Repeat("-", 137))
 	}
 }
 
 func drawOnePair(no int, tx *server.Transaction, option2 bool, verified_status string) {
 	if !option2 {
-		fmt.Printf("| %-4d | %-10d | %-20s |\n", no, tx.Timestamp, strings.TrimSpace(string(tx.Data[:])))
+		fmt.Printf("| %-4d | %-10d | %-100s |\n", no, tx.Timestamp, strings.TrimSpace(string(tx.Data[:])))
 	} else {
-		fmt.Printf("| %-4d | %-10d | %-20s | %-10s |\n", no, tx.Timestamp, strings.TrimSpace(string(tx.Data[:])), verified_status)
+		fmt.Printf("| %-4d | %-10d | %-100s | %-10s |\n", no, tx.Timestamp, strings.TrimSpace(string(tx.Data[:])), verified_status)
 	}
 }
 
@@ -190,11 +190,12 @@ func Client(w *client.Wallet) (string, bool) {
 	case 2:
 		// readfile
 		transactions, error := w.ReadTransactionFile()
-		if error != nil {
+		if error != nil || len(transactions) == 0 {
 			message = "You have no transaction to verify. Press Enter to continue."
 			return message, true
 		}
 		// draw list of transaction
+		clearConsole()
 		drawTable(transactions, nil, false)
 		// choose a transaction based on no.
 		fmt.Print("Select the No. of transaction you want to verify: ")

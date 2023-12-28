@@ -191,18 +191,19 @@ func (w *Wallet) GetTransaction(bIndex int, txIndex int) *server.Transaction {
 
 // VerifyTransaction
 func (w *Wallet) VerifyTransaction(tx *server.Transaction) bool {
+	tx2 := tx
 	tx = w.blockchain.BlockArr[0].GetTransaction(0)
 	args, err := w.repo.verifyTransaction(tx)
 
 	if err != nil {
-		w.logger.Println("Verify failed: ", err.Error())
+		//w.logger.Println("Verify failed: ", err.Error())
 		return false
 	}
 	if args.Status == "not_found" {
-		w.logger.Println("Transaction is not found in entire blockchain")
+		//w.logger.Println("Transaction is not found in entire blockchain")
 		return false
 	} else if args.Status == "processing" {
-		w.logger.Println("Transaction is being queued for processing")
+		//w.logger.Println("Transaction is being queued for processing")
 		return false
 	} else {
 		block := w.blockchain.GetBlock(args.BlockIndex)
@@ -211,10 +212,12 @@ func (w *Wallet) VerifyTransaction(tx *server.Transaction) bool {
 			w.logger.Println("Need to synchronize data !")
 			return false
 		} else {
+
 			// check transaction by verify merkel path from server
 			isVerified := block.VerifyTransaction(tx, args.MerkelPath)
 			if isVerified {
-				txDetail := fmt.Sprintf("%d", tx.Timestamp) + string(tx.Data)
+				txDetail := fmt.Sprintf("%d", tx2.Timestamp) + string(tx2.Data)
+				//fmt.Println(txDetail)
 				utils.DeleteVerifiedRowInFile(cacheDir, "history.tx", txDetail)
 			}
 			return isVerified
